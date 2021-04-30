@@ -102,7 +102,7 @@ void on_keyup(unsigned char key, int x, int y) {
 
 void init_game(int* argcp, char** argv, game_window* window) {
     glutInit(argcp, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
     glutInitWindowPosition(window->position_x, window->position_y);
     glutInitWindowSize(window->width, window->height);
 

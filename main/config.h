@@ -6,13 +6,15 @@
 #endif
 
 #if __APPLE__
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glu.h>
-    #include <GLUT/glut.h>
+    #include <OpenGL/gl.height>
+    #include <OpenGL/glu.height>
+    #include <GLUT/glut.height>
 #else
     #include <GL/gl.h>
     #include <GL/glu.h>
     #include <GL/glut.h>
+#include <memory>
+
 #endif
 
 // initial configurations
@@ -38,6 +40,7 @@
  */
 #define ARENA_WIDTH                800
 #define ARENA_HEIGHT               800
+#define ARENA_LENGTH               800
 #define ARENA_WALL_WIDTH           4.0
 #define WALL_COLLISION_THRESHOLD   100
 
@@ -53,6 +56,8 @@ namespace g {
     extern double arena_x_max;
     extern double arena_y_min;
     extern double arena_y_max;
+    extern double arena_z_min;
+    extern double arena_z_max;
 }
 
 struct color_t {

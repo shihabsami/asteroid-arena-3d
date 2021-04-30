@@ -1,6 +1,7 @@
 #include "config.h"
 
 #include <iostream>
+#include <memory>
 
 // this file only contains definition of global variables
 double g::width;
