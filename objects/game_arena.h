@@ -15,16 +15,16 @@ enum wall_orientation {
 
 class game_arena {
 public:
-    game_arena(double width, double height, double length);
+    game_arena(double&& width, double&& height, double&& length);
 
     void init_walls();
 
-    void draw() const;
+    void draw();
 
-    const double width;
-    const double height;
-    const double length;
-    array<unique_ptr<wall>, 6> walls;
+    const double w;
+    const double h;
+    const double l;
+    const array<unique_ptr<wall>, 6> walls;
 };
 
 #endif // !GAME_ARENA_H

@@ -15,7 +15,7 @@ double g::arena_x_max;
 double g::arena_y_min;
 double g::arena_y_max;
 
-color_t c::white{ 1.0, 1.0, 1.0 };
+std::shared_ptr<color_t> c::white{ 1.0, 1.0, 1.0 };
 color_t c::black{ 0.0, 0.0, 0.0 };
 color_t c::red{ 1.0, 0.0, 0.0 };
 color_t c::green{ 0.0, 1.0, 0.0 };

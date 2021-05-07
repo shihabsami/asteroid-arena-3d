@@ -66,7 +66,7 @@ struct color_t {
 
 // color namespace, containing all the colors used
 namespace c {
-    extern color_t white;
+    extern std::shared_ptr<color_t> white;
     extern color_t black;
     extern color_t red;
     extern color_t green;

@@ -21,7 +21,10 @@ set(SOURCE_FILES main/main.cpp
         math/point3d.cpp math/point3d.h
         math/vector3d.cpp math/vector3d.h
         math/math.h
-        main/camera.cpp main/camera.h)
+        main/camera.cpp main/camera.h
+        objects/game_arena.cpp objects/game_arena.h
+        objects/wall.cpp objects/wall.h
+        math/quaternion.cpp math/quaternion.h)
 
 add_executable(Asteroid_Arena_3D ${SOURCE_FILES})
 target_link_libraries(Asteroid_Arena_3D ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
