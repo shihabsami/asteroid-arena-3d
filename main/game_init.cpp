@@ -46,56 +46,65 @@ double velocity = 200.0;
 double d_angle = 2.0;
 double l_time;
 
+shared_ptr<vector3d> x_axis = make_shared<vector3d>(1.0, 0.0, 0.0);
+shared_ptr<vector3d> y_axis = make_shared<vector3d>(0.0, 1.0, 0.0);
+shared_ptr<vector3d> z_axis = make_shared<vector3d>(0.0, 0.0, 1.0);
+
+void update_axes(const quaternion& q) {
+    x_axis->rotate(q);
+    y_axis->rotate(q);
+    z_axis->rotate(q);
+}
+
 void pitch(bool negative) {
-    vector3d axis = { 1.0, 0.0, 0.0 };
     double angle = (negative ? -d_angle : d_angle) * g::d_time;
 
     quaternion qr = quaternion(
         cos(angle * 0.5), {
-            axis.x * sin(angle * 0.5),
-            axis.y * sin(angle * 0.5),
-            axis.z * sin(angle * 0.5)
+            x_axis->x * sin(angle * 0.5),
+            x_axis->y * sin(angle * 0.5),
+            x_axis->z * sin(angle * 0.5)
         }
     );
 
     *rotation = qr * *rotation;
     direction->rotate(qr);
     camera_up->rotate(qr);
+    update_axes(qr);
 }
 
 void roll(bool negative) {
-    vector3d axis = { 0.0, 0.0, 1.0 };
     double angle = (negative ? -d_angle : d_angle) * g::d_time;
 
     quaternion qr = quaternion(
         cos(angle * 0.5), {
-            axis.x * sin(angle * 0.5),
-            axis.y * sin(angle * 0.5),
-            axis.z * sin(angle * 0.5)
+            z_axis->x * sin(angle * 0.5),
+            z_axis->y * sin(angle * 0.5),
+            z_axis->z * sin(angle * 0.5)
         }
     );
 
     *rotation = qr * *rotation;
     direction->rotate(qr);
     camera_up->rotate(qr);
-
+    update_axes(qr);
 }
 
 void yaw(bool negative) {
-    vector3d axis = { 0.0, 1.0, 0.0 };
     double angle = (negative ? -d_angle : d_angle) * g::d_time;
 
     quaternion qr = quaternion(
         cos(angle * 0.5), {
-            axis.x * sin(angle * 0.5),
-            axis.y * sin(angle * 0.5),
-            axis.z * sin(angle * 0.5)
+            y_axis->x * sin(angle * 0.5),
+            y_axis->y * sin(angle * 0.5),
+            y_axis->z * sin(angle * 0.5)
         }
     );
 
     *rotation = qr * *rotation;
     direction->rotate(qr);
     camera_up->rotate(qr);
+    update_axes(qr);
 }
 
 void test_rotation() {
@@ -253,7 +262,6 @@ void on_idle() {
     glutPostRedisplay();
     error_check("game_init::on_idle");
 }
-
 
 // input functions delegate calls to handler class
 void on_mouseclick(int button, int state, int x, int y) {
