@@ -18,7 +18,7 @@
 #endif
 
 // initial configurations
-#define GAME_TITLE "Asteroid Arena 3D"
+#define GAME_TITLE      "Asteroid Arena 3D"
 #define INIT_WIDTH      1280
 #define INIT_HEIGHT     720
 #define IS_FULLSCREEN   true
@@ -30,13 +30,14 @@
 // constants used in transformations
 #define ORIGIN_X       0
 #define ORIGIN_Y       0
+#define ORIGIN_Z       0
 #define Z_NEAR         1.0
 #define Z_FAR          TOTAL_UNITS + Z_NEAR
 #define FOV            45.0
 
 /*
  * arena width should ideally be within TOTAL_UNITS else it shall exceed
- * the coordinate system's maximum size and shall not be fully visible
+ * the coordinate system'w maximum size and shall not be fully visible
  */
 #define ARENA_WIDTH                800
 #define ARENA_HEIGHT               800
@@ -66,7 +67,7 @@ struct color_t {
 
 // color namespace, containing all the colors used
 namespace c {
-    extern std::shared_ptr<color_t> white;
+    extern color_t white;
     extern color_t black;
     extern color_t red;
     extern color_t green;

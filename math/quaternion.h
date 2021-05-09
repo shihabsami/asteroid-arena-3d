@@ -10,14 +10,17 @@ using std::array;
 class quaternion {
 public:
     quaternion();
-    quaternion(const double& s, const vector3d& v);
-    quaternion(const quaternion& other);
-    quaternion& operator=(const quaternion& other);
-    quaternion operator*(const quaternion& other) const;
+    quaternion(const double& w, const vector3d& v);
+    quaternion(const double& w, const double& x, const double& y, const double& z);
+    quaternion(const quaternion& q);
+    quaternion& operator=(const quaternion& q);
+    quaternion operator*(const quaternion& q) const;
     void normalise();
-    array<double, 16> to_matrix() const;
+    [[nodiscard]] double* to_matrix() const;
 
-    double s;
+    double get_magnitude() const;
+
+    double w;
     vector3d v;
 };
 

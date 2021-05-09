@@ -4,49 +4,49 @@
 
 quaternion::quaternion() = default;
 
-quaternion::quaternion(const double& s, const vector3d& v)
-    : s(s), v(v) {}
+quaternion::quaternion(const double& w, const vector3d& v)
+    : w(w), v(v) {
+}
+
+//quaternion::quaternion(const double& w, const double& x, const double& y, const double& z)
+//    : w(w), x(x), y(y), z(z) {
+//}
 
 void quaternion::normalise() {
-    double m = sqrt(s * s + v.x * v.x + v.y + v.y + v.z + v.z);
-    s /= m;
+    double m = get_magnitude();
+    w /= m;
     v /= m;
+
 }
 
 quaternion quaternion::operator*(const quaternion& q) const {
     return {
-        s * q.s - v.x * q.v.x - v.y * q.v.y - v.z * q.v.z, {
-            s * q.v.x + v.x * q.s + v.y * q.v.z - v.z * q.v.y,
-            s * q.v.y - v.x * q.v.z + v.y * q.s + v.z * q.v.x,
-            s * q.v.z + v.x * q.v.y - v.y * q.v.x + v.z * q.s }};
+        w * q.w - v.x * q.v.x - v.y * q.v.y - v.z * q.v.z, {
+            w * q.v.x + v.x * q.w + v.y * q.v.z - v.z * q.v.y,
+            w * q.v.y - v.x * q.v.z + v.y * q.w + v.z * q.v.x,
+            w * q.v.z + v.x * q.v.y - v.y * q.v.x + v.z * q.w
+        }
+    };
+
+    // return { w * q.w - v.dot(q.v), q.v * w + v * q.w + v.cross(q.v) };
 }
 
-array<double, 16> quaternion::to_matrix() const {
-    array<double, 16> matrix{};
-    matrix.at(0) = 1 - 2 * v.y * v.y - 2 * v.z * v.z;
-    matrix.at(1) = 2 * v.x * v.y - 2 * s * v.z;
-    matrix.at(2) = 2 * v.x * v.z + 2 * s * v.y;
-    matrix.at(3) = 0;
-
-    matrix.at(4) = 2 * v.x * v.y + 2 * s * v.z;
-    matrix.at(5) = 1 - 2 * v.x * v.x - 2 * v.z * v.z;
-    matrix.at(6) = 2 * v.y * v.z + 2 * s * v.x;
-    matrix.at(7) = 0;
-
-    matrix.at(8) = 2 * v.x * v.z - 2 * s * v.y;
-    matrix.at(9) = 2 * v.y * v.z - 2 * s * v.x;
-    matrix.at(10) = 1 - 2 * v.x * v.x - 2 * v.y * v.y;
-    matrix.at(11) = 0;
-
-    matrix.at(11) = 0;
-    matrix.at(12) = 0;
-    matrix.at(13) = 0;
-    matrix.at(14) = 1;
+double* quaternion::to_matrix() const {
+    auto* matrix = new double[16]{
+        1 - 2 * (v.z * v.z + v.y * v.y), 2 * (v.x * v.y + w * v.z), 2 * (v.z * v.x - w * v.y), 0.0,
+        2 * (v.x * v.y - w * v.z), 1 - 2 * (v.x * v.x + v.z * v.z), 2 * (v.y * v.z + w * v.x), 0.0,
+        2 * (v.z * v.x + w * v.y), 2 * (v.y * v.z - w * v.x), 1 - 2 * (v.x * v.x + v.y * v.y), 0.0,
+        0.0, 0.0, 0.0, 1.0
+    };
 
     return matrix;
 }
 
-quaternion::quaternion(const quaternion& other) = default;
+double quaternion::get_magnitude() const {
+    return sqrt(w * w + v.x * v.x + v.y * v.y + v.z * v.z);
+}
 
-quaternion& quaternion::operator=(const quaternion& other) = default;
+quaternion::quaternion(const quaternion& q) = default;
+
+quaternion& quaternion::operator=(const quaternion& q) = default;
 
