@@ -18,10 +18,9 @@ set(SOURCE_FILES main/main.cpp
         main/game_window.cpp main/game_window.h
         main/game_init.cpp main/game_init.h
         utilities/input_handler.cpp utilities/input_handler.h
+        math/game_math.h
         math/point3d.cpp math/point3d.h
         math/vector3d.cpp math/vector3d.h
-        math/math.h
-        main/camera.cpp main/camera.h
         math/quaternion.cpp math/quaternion.h)
 
 add_executable(Asteroid_Arena_3D ${SOURCE_FILES})

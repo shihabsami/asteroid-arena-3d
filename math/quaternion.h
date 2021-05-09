@@ -10,18 +10,34 @@ using std::array;
 class quaternion {
 public:
     quaternion();
-    quaternion(const double& w, const vector3d& v);
-    quaternion(const double& w, const double& x, const double& y, const double& z);
+
+    quaternion(double w, const vector3d& v);
+
+    quaternion(double w, double x, double y, double z);
+
     quaternion(const quaternion& q);
+
     quaternion& operator=(const quaternion& q);
-    quaternion operator*(const quaternion& q) const;
+
     void normalise();
+
+    [[nodiscard]] double get_norm() const;
+
     [[nodiscard]] double* to_matrix() const;
 
-    double get_magnitude() const;
+    [[nodiscard]] quaternion get_conjugate() const;
 
-    double w;
-    vector3d v;
+    [[nodiscard]] quaternion get_inverse() const;
+
+    quaternion operator*(const quaternion& q) const;
+
+    quaternion operator*(double s) const;
+
+    double w{};
+    double x{};
+    double y{};
+    double z{};
+    double n{};
 };
 
 #endif // !QUATERNION_H

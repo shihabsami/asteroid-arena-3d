@@ -17,7 +17,7 @@ double l_time;
 
 shared_ptr<vector3d> camera_position;
 shared_ptr<vector3d> camera_up;
-shared_ptr<vector3d> quad_position;
+shared_ptr<vector3d> cube_position = make_shared<vector3d>(0.0, 0.0, 0.0);
 
 struct cube {
     shared_ptr<array<point3d, 8>> vertices;
@@ -68,7 +68,8 @@ void draw_axes() {
     glPopMatrix();
 }
 
-quaternion q = quaternion(1.0, { 0.0, 0.0, 0.0 });
+shared_ptr<vector3d> v = make_shared<vector3d>(0.0, 0.0, -1.0);
+shared_ptr<quaternion> q = make_shared<quaternion>(1.0, 0.0, 0.0, 0.0);
 
 void on_display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -84,14 +85,20 @@ void on_display() {
     draw_axes();
 
     glPushMatrix();
-
-    glMultMatrixd(q.to_matrix());
-    glTranslated(quad_position->x, quad_position->y, quad_position->z);
+    glTranslated(cube_position->x, cube_position->y, cube_position->z);
+    glMultMatrixd(q->to_matrix());
     glScaled(5.0, 5.0, 5.0);
-
     glColor3d(c::purple.r, c::purple.g, c::purple.b);
     glutWireCube(1.0);
+    glPopMatrix();
 
+    glPushMatrix();
+    glScaled(10.0, 10.0, 10.0);
+    glColor3d(c::white.r, c::white.g, c::white.b);
+    glBegin(GL_LINES);
+    glVertex3d(0.0, 0.0, 0.0);
+    glVertex3d(v->x * 1.5, v->y * 1.5, v->z * 1.5);
+    glEnd();
     glPopMatrix();
 
     glutSwapBuffers();
@@ -115,20 +122,18 @@ void on_reshape(int width, int height) {
 }
 
 void update_position() {
-    if (input::key_states[Q])
-        quad_position->z += 1;
-    if (input::key_states[E])
-        quad_position->z -= 1;
+//    if (input::key_states[Q])
+//    if (input::key_states[E])
     if (input::key_states[W])
-        quad_position->y += 1;
-    if (input::key_states[S])
-        quad_position->y -= 1;
-    if (input::key_states[D])
-        quad_position->x += 1;
-    if (input::key_states[A])
-        quad_position->x -= 1;
-    if (input::key_states[SPACEBAR])
-        q = { 1.0, { 0.0, 0.0, 0.0 }};
+        *cube_position += *v * 10.0 * g::d_time;
+
+//    if (input::key_states[S])
+//
+//    if (input::key_states[D])
+//
+//    if (input::key_states[A])
+
+//    if (input::key_states[SPACEBAR])
 }
 
 void pitch(bool negative) {
@@ -143,7 +148,8 @@ void pitch(bool negative) {
         }
     );
 
-    q = qr * q;
+    *q = qr * *q;
+    v->rotate(qr);
 }
 
 void roll(bool negative) {
@@ -158,7 +164,8 @@ void roll(bool negative) {
         }
     );
 
-    q = qr * q;
+    *q = qr * *q;
+    v->rotate(qr);
 }
 
 void yaw(bool negative) {
@@ -173,7 +180,8 @@ void yaw(bool negative) {
         }
     );
 
-    q = qr * q;
+    *q = qr * *q;
+    v->rotate(qr);
 }
 
 void on_rotate(int key, int x, int y) {
@@ -201,7 +209,7 @@ void on_rotate(int key, int x, int y) {
         break;
     }
 
-    auto* f = q.to_matrix();
+    auto* f = q->to_matrix();
     printf(
         "%.3f %.3f %.3f %.3f\n%.3f %.3f %.3f, %.3f\n%.3f %.3f %.3f %.3f\n%.3f %.3f %.3f %.3f\n\n",
         f[0], f[1], f[2], f[3],
@@ -209,7 +217,10 @@ void on_rotate(int key, int x, int y) {
         f[8], f[9], f[10], f[11],
         f[12], f[13], f[14], f[15]);
 
-    printf("q.m:   %f\n", q.get_magnitude());
+    printf("v.x: %3f, v.y: %.3f, v.z: %.3f\n", v->x, v->y, v->z);
+
+    printf("q.n: %f\n", q->get_norm());
+    printf("v.m: %f\n", v->get_magnitude());
 }
 
 void on_idle() {
@@ -244,6 +255,15 @@ void init_camera() {
     camera_up = make_shared<vector3d>(0.0, 1.0, 0.0);
 }
 
+void test() {
+    vector3d v_t{ 1.0, 0.0, 0.0 };
+    // quaternion q_t{ 0.707, 0.0, 0.0, 0.707 };
+    vector3d axis_t{ 0.0, 0.0, 1.0 };
+    v_t.rotate(90.0, axis_t);
+
+    printf("%.3f, %.3f, %.3f\n", v_t.x, v_t.y, v_t.z);
+}
+
 void init_game(int* argcp, char** argv, game_window* window) {
     glutInit(argcp, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
@@ -272,7 +292,6 @@ void init_game(int* argcp, char** argv, game_window* window) {
     gluPerspective(FOV, g::width / g::height, Z_NEAR, Z_FAR);
 
     init_camera();
-    quad_position = make_shared<vector3d>();
 
     glutMainLoop();
 }

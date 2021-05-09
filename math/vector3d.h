@@ -1,6 +1,8 @@
 #ifndef VECTOR_3D_H
 #define VECTOR_3D_H
 
+class quaternion;
+
 class vector3d {
 public:
     vector3d();
@@ -27,6 +29,10 @@ public:
 
     // cross product operation between two vectors
     [[nodiscard]] vector3d cross(const vector3d& v) const;
+
+    void rotate(double angle, const vector3d& axis);
+
+    void rotate(const quaternion& q);
 
     // operator overloads to do scalar operations
     vector3d operator+(const vector3d& v) const;
