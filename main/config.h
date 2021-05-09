@@ -24,7 +24,7 @@
 #define IS_FULLSCREEN   true
 
 // the total number of units in the z axis when aspect ratio is 1.0
-#define TOTAL_UNITS   50
+#define TOTAL_UNITS   1000
 #define MAX_ANGLE   360.0
 
 // constants used in transformations
@@ -69,6 +69,7 @@ struct color_t {
 namespace c {
     extern color_t white;
     extern color_t black;
+    extern color_t gray;
     extern color_t red;
     extern color_t green;
     extern color_t blue;

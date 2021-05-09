@@ -10,6 +10,7 @@ double g::c_time;
 
 color_t c::white{ 1.0, 1.0, 1.0 };
 color_t c::black{ 0.0, 0.0, 0.0 };
+color_t c::gray{0.25, 0.25, 0.25};
 color_t c::red{ 1.0, 0.0, 0.0 };
 color_t c::green{ 0.0, 1.0, 0.0 };
 color_t c::blue{ 0.0, 0.0, 1.0 };
