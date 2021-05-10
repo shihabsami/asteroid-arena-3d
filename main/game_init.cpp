@@ -4,6 +4,7 @@
 #include "../math/vector3d.h"
 #include "../math/quaternion.h"
 #include "../utilities/input_handler.h"
+#include "../utilities/object_loader.h"
 
 #include <array>
 #include <memory>
@@ -279,6 +280,13 @@ void on_keyup(unsigned char key, int x, int y) {
     error_check("game_init::on_keyup");
 }
 
+void test_obj() {
+    stringstream stream;
+    stream << ".." << PATH_SEPARATOR << "files" << PATH_SEPARATOR << "models" << PATH_SEPARATOR << "cube.obj";
+    string filename = stream.str();
+    load_obj(filename.c_str());
+}
+
 void init_game(int* argcp, char** argv, game_window* window) {
     glutInit(argcp, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
@@ -306,6 +314,8 @@ void init_game(int* argcp, char** argv, game_window* window) {
     gluPerspective(FOV, g::width / g::height, Z_NEAR, Z_FAR);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
+    test_obj();
 
     glutMainLoop();
 }

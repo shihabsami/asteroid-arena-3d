@@ -17,11 +17,14 @@ set(SOURCE_FILES main/main.cpp
         main/config.cpp main/config.h
         main/game_window.cpp main/game_window.h
         main/game_init.cpp main/game_init.h
-        utilities/input_handler.cpp utilities/input_handler.h
         math/game_math.h
+        math/point2d.cpp math/point2d.h
         math/point3d.cpp math/point3d.h
         math/vector3d.cpp math/vector3d.h
-        math/quaternion.cpp math/quaternion.h)
+        math/quaternion.cpp math/quaternion.h
+        utilities/input_handler.cpp utilities/input_handler.h
+        utilities/mesh_component.cpp utilities/mesh_component.h
+        utilities/object_loader.cpp utilities/object_loader.h)
 
 add_executable(Asteroid_Arena_3D ${SOURCE_FILES})
 target_link_libraries(Asteroid_Arena_3D ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
