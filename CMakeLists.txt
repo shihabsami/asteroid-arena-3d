@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20.1)
 project(Asteroid_Arena_3D)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_WARN_DEPRECATED FALSE)
 
 find_package(GLUT REQUIRED)
 include_directories(${GLUT_INCLUDE_DIRS})
@@ -23,8 +24,8 @@ set(SOURCE_FILES main/main.cpp
         math/vector3d.cpp math/vector3d.h
         math/quaternion.cpp math/quaternion.h
         utilities/input_handler.cpp utilities/input_handler.h
-        utilities/mesh_component.cpp utilities/mesh_component.h
-        utilities/object_loader.cpp utilities/object_loader.h)
+        utilities/mesh_component.h
+        utilities/object_loader.cpp utilities/object_loader.h utilities/lighting_component.h main/graphics.h)
 
 add_executable(Asteroid_Arena_3D ${SOURCE_FILES})
 target_link_libraries(Asteroid_Arena_3D ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})

@@ -5,6 +5,7 @@
 #include "../math/quaternion.h"
 #include "../utilities/input_handler.h"
 #include "../utilities/object_loader.h"
+#include "../utilities/lighting_component.h"
 
 #include <array>
 #include <memory>
@@ -156,6 +157,15 @@ void draw_plane() {
     glPopMatrix();
 }
 
+vector<vertex> test_obj() {
+    stringstream stream;
+    stream << ".." << PATH_SEPARATOR << "files" << PATH_SEPARATOR << "models" << PATH_SEPARATOR << "cube.obj";
+    string filename = stream.str();
+    return load_obj(filename.c_str());
+}
+
+vector<vertex> vertices = test_obj();
+
 void on_display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
@@ -185,6 +195,30 @@ void on_display() {
     glVertex3d(0.0, 0.0, 0.0);
     glVertex3d(direction->x, direction->y, direction->z);
     glEnd();
+    glPopMatrix();
+
+    material model_material{
+        { 0.2f, 0.2f, 0.2f, 1.0f },
+        { 1.0f, 0.0f, 0.0f, 1.0f },
+        { 0.0f, 0.0f, 0.0f, 1.0f },
+        { 0.0f, 0.0f, 0.0f, 1.0f },
+        16.0f
+    };
+
+    glPushMatrix();
+    glTranslated(0.0, 25.0, 0.0);
+    glScaled(50.0, 50.0, 50.0);
+    gl_material(model_material);
+    for (int i = 0; i < vertices.size(); i += 3) {
+        glBegin(GL_TRIANGLES);
+        glNormal3d(vertices.at(i).normal.x, vertices.at(i).normal.y, vertices.at(i).normal.z);
+        glVertex3d(vertices.at(i).position.x, vertices.at(i).position.y, vertices.at(i).position.z);
+        glNormal3d(vertices.at(i + 1).normal.x, vertices.at(i + 1).normal.y, vertices.at(i + 1).normal.z);
+        glVertex3d(vertices.at(i + 1).position.x, vertices.at(i + 1).position.y, vertices.at(i + 1).position.z);
+        glNormal3d(vertices.at(i + 2).normal.x, vertices.at(i + 2).normal.y, vertices.at(i + 2).normal.z);
+        glVertex3d(vertices.at(i + 2).position.x, vertices.at(i + 2).position.y, vertices.at(i + 2).position.z);
+        glEnd();
+    }
     glPopMatrix();
 
     glutSwapBuffers();
@@ -280,11 +314,22 @@ void on_keyup(unsigned char key, int x, int y) {
     error_check("game_init::on_keyup");
 }
 
-void test_obj() {
-    stringstream stream;
-    stream << ".." << PATH_SEPARATOR << "files" << PATH_SEPARATOR << "models" << PATH_SEPARATOR << "cube.obj";
-    string filename = stream.str();
-    load_obj(filename.c_str());
+void init_lighting() {
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    material light0_material{
+        { 0.4f, 0.4f, 0.4f, 1.0f },
+        { 0.8f, 0.8f, 0.8f, 1.0f },
+        { 0.0f, 0.0f, 0.0f, 1.0f },
+        { 0.0f, 0.0f, 0.0f, 1.0f },
+        16.0f
+    };
+
+    point3d light0_position{ 0.0, 100.0, 0.0};
+
+    gl_light(GL_LIGHT0, light0_material, light0_position);
 }
 
 void init_game(int* argcp, char** argv, game_window* window) {
@@ -315,7 +360,7 @@ void init_game(int* argcp, char** argv, game_window* window) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    test_obj();
+    init_lighting();
 
     glutMainLoop();
 }

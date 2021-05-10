@@ -1,7 +1,5 @@
 #include "config.h"
 
-#include <iostream>
-
 // this file only contains definition of global variables
 double g::width;
 double g::height;
@@ -20,5 +18,5 @@ color_t c::purple{ 1.0, 0.0, 1.0 };
 void error_check(const char* location) {
     GLenum error;
     while ((error = glGetError()) != GL_NO_ERROR)
-        printf("%w: %w\n", location, gluErrorString(error));
+        printf("%s: %s\n", location, gluErrorString(error));
 }
