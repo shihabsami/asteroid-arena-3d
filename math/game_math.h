@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#include "../main/config.h"
+#include "../utilities/lighting_component.h"
 
 // this namespace contains definitions of static math functions used all throughout
 static double to_radians(double degrees) {
@@ -15,10 +15,10 @@ static double to_degrees(double radians) {
 }
 
 // generate double random numbers
-static double get_random(double lower, double upper) {
-    // TODO make use <random> engine and real distribution
-    return lower + (rand() / (RAND_MAX / (upper - lower)));
-}
+//static double get_random(double lower, double upper) {
+//    // TODO make use <random> engine and real distribution
+//    return lower + (rand() / (RAND_MAX / (upper - lower)));
+//}
 
 // linear interpolation for double numbers
 static double lerp(double start, double end, double t) {

@@ -18,6 +18,7 @@ set(SOURCE_FILES main/main.cpp
         main/config.cpp main/config.h
         main/game_window.cpp main/game_window.h
         main/game_init.cpp main/game_init.h
+        main/camera.cpp main/camera.h
         math/game_math.h
         math/point2d.cpp math/point2d.h
         math/point3d.cpp math/point3d.h
@@ -25,7 +26,12 @@ set(SOURCE_FILES main/main.cpp
         math/quaternion.cpp math/quaternion.h
         utilities/input_handler.cpp utilities/input_handler.h
         utilities/mesh_component.h
-        utilities/object_loader.cpp utilities/object_loader.h utilities/lighting_component.h main/graphics.h)
+        utilities/object_loader.h
+        utilities/lighting_component.h utilities/mesh_component.h main/graphics.h
+#        objects/game_arena.cpp objects/game_arena.h
+#        objects/wall.cpp objects/wall.h
+
+        )
 
 add_executable(Asteroid_Arena_3D ${SOURCE_FILES})
 target_link_libraries(Asteroid_Arena_3D ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
