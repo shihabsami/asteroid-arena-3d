@@ -7,7 +7,7 @@ using std::size_t;
 
 class component {
 public:
-    component() = default;
+    inline component() = default;
 };
 
 #endif // !COMPONENT_H

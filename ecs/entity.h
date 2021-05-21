@@ -16,6 +16,7 @@ public:
     inline ~entity() { component_data.clear(); }
     void assign_component(size_t c_id, const shared_ptr<component>& c);
     void remove_component(size_t c_id);
+    bool has(size_t c_id);
 
     const size_t id;
     unordered_map<size_t, bool> component_register;
@@ -32,8 +33,12 @@ inline void entity::assign_component(size_t c_id, const shared_ptr<component>& c
 inline void entity::remove_component(size_t c_id) {
     if (component_register[c_id]) {
         component_register[c_id] = false;
-        component_data[c_id].reset();
+        component_data.erase(c_id);
     }
+}
+
+inline bool entity::has(size_t c_id) {
+    return component_register[c_id];
 }
 
 #endif // !ENTITY_H

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <utility>
 
-#include "manager.h"
+#include "data_manager.h"
 
 using std::cout;
 using std::endl;
@@ -18,10 +18,27 @@ public:
     int data{};
 };
 
-int main() {
-    shared_ptr<e_test> entity = manager::register_entity<e_test>();
-    cout << manager::entities.size() << endl;
+class c_test_alt : public component {
+};
 
-    manager::register_component<c_test>(entity, 0);
-    cout << entity->component_data[manager::component_type_id<c_test>()] << endl;
+int main() {
+    shared_ptr<e_test> entity = data_manager::register_entity<e_test>();
+    cout << data_manager::entities.size() << endl;
+
+    data_manager::register_component<c_test>(entity, 0);
+    data_manager::register_component<c_test_alt>(entity);
+    data_manager::register_component<c_test_alt>(entity);
+    data_manager::register_component<c_test_alt>(entity);
+
+    for (const auto& c : entity->component_data)
+        cout << c.first << " - " << c.second << endl;
+
+    cout << entity->component_register.size() << endl;
+    cout << (data_manager::entity_has<c_test>(entity) ? "y" : "n") << endl;
+
+    entity->remove_component(1);
+    for (const auto& c : entity->component_data)
+        cout << c.first << " - " << c.second << endl;
+
+    cout << (data_manager::entity_has<c_test>(entity) ? "y" : "n") << endl;
 }
