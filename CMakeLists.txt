@@ -14,7 +14,7 @@ link_directories(${OpenGL_LIBRARY_DIRS})
 add_definitions(${OpenGL_DEFINITIONS})
 
 include_directories("/usr/include/GL")
-set(SOURCE_FILES ecs/test.cpp ecs/component.h ecs/entity.h ecs/manager.h ecs/constants.h)
+set(SOURCE_FILES ecs/test.cpp ecs/component.h ecs/entity.h ecs/manager.h)
 
 #set(SOURCE_FILES main/main.cpp
 #        main/config.cpp main/config.h

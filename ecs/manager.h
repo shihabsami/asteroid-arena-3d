@@ -2,53 +2,52 @@
 #define MANAGER_H
 
 #include "entity.h"
-#include "component.h"
 
 #include <vector>
-#include <deque>
+#include <utility>
 
 using std::vector;
-using std::deque;
+using std::forward;
+using std::enable_if;
+using std::is_base_of;
 
-namespace manager {
-    static size_t base_entity_id = -1;
-    static size_t base_component_id = -1;
+class manager {
+public:
+    static size_t base_entity_id;
+    static size_t base_component_id;
+    static vector<shared_ptr<entity>> entities;
 
-    static vector<entity> entities;
-    static vector<component> components;
-
-    static deque<size_t> available_entity_ids;
-    static deque<size_t> available_component_ids;
+    manager() = default;
 
     template<typename T>
-    size_t get_entity_id() {
+    static size_t entity_type_id() {
         static size_t new_id = base_entity_id += 1;
         return new_id;
     }
 
     template<typename T>
-    void get_component_id() {
+    static size_t component_type_id() {
         static size_t new_id = base_component_id += 1;
         return new_id;
     }
 
-    template<typename T>
-    size_t register_entity() {
-
+    template<typename T, typename enable_if<is_base_of<entity, T>::value>::type* = nullptr>
+    static shared_ptr<T> register_entity() {
+        shared_ptr<T> e = make_shared<T>(entity_type_id<T>());
+        entities.template emplace_back(e);
+        return e;
     }
 
-    template<typename T>
-    void register_component(size_t e_index) {
-
+    template<typename T, typename enable_if<is_base_of<component, T>::value>::type* = nullptr, typename... U>
+    static shared_ptr<T> register_component(const shared_ptr<entity>& e, U... u) {
+        shared_ptr<T> c = make_shared<T>(forward<U>(u)... );
+        e->assign_component(component_type_id<T>(), c);
+        return c;
     }
+};
 
-    template<typename T>
-    vector<entity> get_entities() {
-    }
-
-    template<typename T>
-    void assign(size_t e_index) {
-    }
-}
+size_t manager::base_component_id{};
+size_t manager::base_entity_id{};
+vector<shared_ptr<entity>> manager::entities{};
 
 #endif // !MANAGER_H

@@ -1,44 +1,39 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include "constants.h"
+#include "component.h"
 
-#include <iostream>
-#include <bitset>
-#include <array>
-#include <ostream>
+#include <unordered_map>
+#include <memory>
 
-using std::size_t;
-using std::bitset;
-using std::array;
-using std::ostream;
+using std::unordered_map;
+using std::shared_ptr;
+using std::make_shared;
 
 class entity {
 public:
-    explicit entity(size_t id);
-    void assign_component(size_t c_id, size_t c_index);
+    inline explicit entity(size_t id) : id(id) {}
+    inline ~entity() { component_data.clear(); }
+    void assign_component(size_t c_id, const shared_ptr<component>& c);
     void remove_component(size_t c_id);
-    friend ostream& operator<<(ostream& stream, const entity& e);
 
     const size_t id;
+    unordered_map<size_t, bool> component_register;
+    unordered_map<size_t, shared_ptr<component>> component_data;
 };
 
-entity::entity(size_t id) : id(id) {
-    c_indices.fill(-1);
+inline void entity::assign_component(size_t c_id, const shared_ptr<component>& c) {
+    if (!component_register[c_id]) {
+        component_register[c_id] = true;
+        component_data[c_id] = c;
+    }
 }
 
-void entity::assign_component(size_t c_id, size_t c_index) {
-    c_mask.set(c_id);
-}
-
-void entity::remove_component(size_t c_id) {
-    c_mask.reset(c_id);
-    c_indices.at(c_id) = -1;
-}
-
-ostream& operator<<(ostream& stream, const entity& e) {
-    stream << "id: " << e.id << ", component mask: " << e.c_mask;
-    return stream;
+inline void entity::remove_component(size_t c_id) {
+    if (component_register[c_id]) {
+        component_register[c_id] = false;
+        component_data[c_id].reset();
+    }
 }
 
 #endif // !ENTITY_H

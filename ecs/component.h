@@ -2,16 +2,12 @@
 #define COMPONENT_H
 
 #include <iostream>
-#include <utility>
 
 using std::size_t;
-using std::forward;
 
 class component {
 public:
-    component(size_t id);
-
-    size_t id;
+    component() = default;
 };
 
 #endif // !COMPONENT_H

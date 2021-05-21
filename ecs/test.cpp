@@ -1,38 +1,27 @@
 #include <iostream>
 #include <utility>
 
+#include "manager.h"
+
 using std::cout;
 using std::endl;
-using std::forward;
 
-struct vector3d {
-    vector3d(int x, int y, int z) : x(x), y(y), z(z) {}
-
-    int x;
-    int y;
-    int z;
-};
-
-struct transform {
-    transform(vector3d p, int s) : position(p), size(s) {}
-
-    vector3d position;
-    int size;
-};
-
-template<typename T>
-class component {
+class e_test : public entity {
 public:
-    template<typename ... U>
-    explicit component(U ... u);
-
-    T data;
+    explicit e_test(size_t id) : entity::entity(id) {}
 };
 
-template<typename T>
-template<typename ... U>
-component<T>::component(U ... u) : data(forward<U>(u) ... ) {}
+class c_test : public component {
+public:
+    explicit c_test(int data) : data(data) {}
+
+    int data{};
+};
 
 int main() {
-    component<transform> c = component<transform>(vector3d(1.0, 1.0, 1.0), 1.0);
+    shared_ptr<e_test> entity = manager::register_entity<e_test>();
+    cout << manager::entities.size() << endl;
+
+    manager::register_component<c_test>(entity, 0);
+    cout << entity->component_data[manager::component_type_id<c_test>()] << endl;
 }
