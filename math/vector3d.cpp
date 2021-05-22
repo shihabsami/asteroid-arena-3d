@@ -15,7 +15,7 @@ vector3d::vector3d(const vector3d& v) = default;
 vector3d& vector3d::operator=(const vector3d& v) = default;
 
 double vector3d::get_magnitude() const {
-    return sqrt(x * x + y * y + z * z);
+    return std::sqrt(x * x + y * y + z * z);
 }
 
 void vector3d::normalise() {
@@ -26,7 +26,7 @@ void vector3d::normalise() {
 }
 
 double vector3d::get_distance(const vector3d& v) const {
-    return sqrt((x - v.x) * (x - v.x) + (y - v.y) * (y - v.y) + (z - v.z) * (z - v.z));
+    return std::sqrt((x - v.x) * (x - v.x) + (y - v.y) * (y - v.y) + (z - v.z) * (z - v.z));
 }
 
 double vector3d::get_distance_squared(const vector3d& v) const {
@@ -45,26 +45,41 @@ vector3d vector3d::cross(const vector3d& v) const {
     };
 }
 
-void vector3d::rotate(double angle, const vector3d& axis) {
+vector3d vector3d::get_rotated(double angle, const vector3d& axis) const {
     quaternion p{ 0.0, *this };
-    quaternion q{ cos(to_radians(angle  * 0.5)), axis * sin(to_radians(angle  * 0.5)) };
+    quaternion q{ cos(to_radians(angle * 0.5)), axis * sin(to_radians(angle * 0.5)) };
     quaternion rotated = q * p * q.get_inverse();
-
-    x = rotated.x;
-    y = rotated.y;
-    z = rotated.z;
-    m = get_magnitude();
+    return { rotated.x, rotated.y, rotated.z };
 }
 
-void vector3d::rotate(const quaternion& q) {
+vector3d vector3d::get_rotated(const quaternion& q) const {
     vector3d u(q.x, q.y, q.z);
     double s = q.w;
+    return (u * 2.0 * dot(u)) + *this * (s * s - u.dot(u)) + (u.cross(*this) * 2.0f * s);
+}
 
-    vector3d rotated = (u * 2.0 * dot(u)) + *this * (s * s - u.dot(u)) + (u.cross(*this) * 2.0f * s);
+void vector3d::rotate(double angle, const vector3d& axis) {
+    vector3d rotated = get_rotated(angle, axis);
     x = rotated.x;
     y = rotated.y;
     z = rotated.z;
     m = rotated.m;
+}
+
+void vector3d::rotate(const quaternion& q) {
+    vector3d rotated = get_rotated(q);
+    x = rotated.x;
+    y = rotated.y;
+    z = rotated.z;
+    m = rotated.m;
+}
+
+vector3d vector3d::lerp(const vector3d& start, const vector3d& end, double t) {
+    return {
+        std::lerp(start.x, end.x, t),
+        std::lerp(start.y, end.y, t),
+        std::lerp(start.z, end.z, t)
+    };
 }
 
 vector3d vector3d::operator+(const vector3d& v) const {

@@ -18,7 +18,7 @@ set(SOURCE_FILES main/main.cpp
         main/config.cpp main/config.h
         main/game_window.cpp main/game_window.h
         main/game_init.cpp main/game_init.h
-        main/camera.cpp main/camera.h
+        main/game_camera.cpp main/game_camera.h
         math/game_math.h
         math/point2d.cpp math/point2d.h
         math/point3d.cpp math/point3d.h

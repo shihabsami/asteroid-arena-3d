@@ -5,6 +5,8 @@
 
 #include "../utilities/lighting_component.h"
 
+using std::lerp;
+
 // this namespace contains definitions of static math functions used all throughout
 static double to_radians(double degrees) {
     return (degrees * M_PI) / 180;
@@ -20,10 +22,6 @@ static double to_degrees(double radians) {
 //    return lower + (rand() / (RAND_MAX / (upper - lower)));
 //}
 
-// linear interpolation for double numbers
-static double lerp(double start, double end, double t) {
-    return start + (end - start) * t;
-}
 
 // linear interpolation for color_t values
 static color_t lerp(color_t start, color_t end, double t) {

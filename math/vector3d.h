@@ -30,9 +30,15 @@ public:
     // cross product operation between two vectors
     [[nodiscard]] vector3d cross(const vector3d& v) const;
 
+    [[nodiscard]] vector3d get_rotated(double angle, const vector3d& axis) const;
+
+    [[nodiscard]] vector3d get_rotated(const quaternion& q) const;
+
     void rotate(double angle, const vector3d& axis);
 
     void rotate(const quaternion& q);
+
+    static vector3d lerp(const vector3d& start, const vector3d& end, double t);
 
     // operator overloads to do scalar operations
     vector3d operator+(const vector3d& v) const;

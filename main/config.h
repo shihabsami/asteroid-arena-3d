@@ -49,7 +49,7 @@
 #define WALL_COLLISION_THRESHOLD   100
 
 
-#define CAMERA_LAG 1.0
+#define CAMERA_LAG 5.0
 
 
 // g namespace containing all g variables used

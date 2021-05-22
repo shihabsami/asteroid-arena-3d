@@ -1,12 +1,8 @@
 #include "game_init.h"
 #include "config.h"
-#include "../math/point3d.h"
-#include "../math/vector3d.h"
-#include "../math/quaternion.h"
+#include "game_camera.h"
+#include "../math/game_math.h"
 #include "../utilities/input_handler.h"
-#include "../utilities/object_loader.h"
-#include "../utilities/lighting_component.h"
-#include "camera.h"
 
 #include <array>
 #include <memory>
@@ -16,52 +12,20 @@ using std::array;
 using std::shared_ptr;
 using std::make_shared;
 
-shared_ptr<vector3d> camera_position = make_shared<vector3d>(0.0, 15.0, TOTAL_UNITS / 2.0);
-shared_ptr<vector3d> camera_up = make_shared<vector3d>(0.0, 1.0, 0.0);
-camera cam{{ 0.0, 15.0, TOTAL_UNITS / 2.0 }, { 0.0, 1.0, 0.0 }};
+shared_ptr<vector3d> forward = make_shared<vector3d>(0.0, 0.0, -1.0);
 
-shared_ptr<vector3d> cube_position = make_shared<vector3d>(0.0, 0.0, 0.0);
+shared_ptr<game_camera> camera;
+shared_ptr<vector3d> position = make_shared<vector3d>(0.0, 50.0, 0.0);
 shared_ptr<vector3d> direction = make_shared<vector3d>(0.0, 0.0, -1.0);
 shared_ptr<quaternion> rotation = make_shared<quaternion>(quaternion::get_identity());
+
 double velocity = 500.0;
-double d_angle = 2.0;
+double d_angle = 90.0;
 double l_time;
 
 shared_ptr<vector3d> x_axis = make_shared<vector3d>(1.0, 0.0, 0.0);
 shared_ptr<vector3d> y_axis = make_shared<vector3d>(0.0, 1.0, 0.0);
 shared_ptr<vector3d> z_axis = make_shared<vector3d>(0.0, 0.0, 1.0);
-
-void test_rotation() {
-    vector3d v_t{ 1.0, 0.0, 0.0 };
-    vector3d axis_t{ 0.0, 0.0, 1.0 };
-    // v_t.rotate(90.0, axis_t);
-
-    quaternion q{ 1.0, 0.0, 0.0, 0.0 };
-    v_t.rotate(q);
-
-    printf("%.3f, %.3f, %.3f\n", v_t.x, v_t.y, v_t.z);
-}
-
-void test_quaternion() {
-    quaternion q_x{ 0.707, 0.707, 0.0, 0.0 };
-    quaternion q_z{ 0.707, 0.0, 0.0, 0.707 };
-
-    quaternion q_result = quaternion::slerp(q_x, q_z, 0.5);
-
-    printf("%.3f, %.3f, %.3f, %.3f\n", q_result.w, q_result.x, q_result.y, q_result.z);
-}
-
-shared_ptr<mesh_t> test_obj(const char* filename) {
-    stringstream stream;
-    stream << ".." << PATH_SEPARATOR << "files" << PATH_SEPARATOR << "models" << PATH_SEPARATOR << filename;
-    string filename_str = stream.str();
-    return load_obj(filename_str.c_str());
-}
-
-shared_ptr<mesh_t> body = test_obj("helicopter\\body.obj");
-shared_ptr<mesh_t> blades = test_obj("helicopter\\blades.obj");
-shared_ptr<mesh_t> tail = test_obj("helicopter\\tail.obj");
-double blade_rotation = 0.0;
 
 void update_axes(const quaternion& q) {
     x_axis->rotate(q);
@@ -69,86 +33,23 @@ void update_axes(const quaternion& q) {
     z_axis->rotate(q);
 }
 
-void pitch(bool negative) {
-    double angle = (negative ? -d_angle : d_angle) * g::d_time;
-
-    quaternion qr = quaternion(
-        cos(angle * 0.5), {
-            x_axis->x * sin(angle * 0.5),
-            x_axis->y * sin(angle * 0.5),
-            x_axis->z * sin(angle * 0.5)
-        }
-    );
-
-    *rotation = qr * *rotation;
-    direction->rotate(qr);
-
-    camera_up->rotate(qr);
-    // cam.rotate(qr);
-
-    update_axes(qr);
-}
-
-void roll(bool negative) {
-    double angle = (negative ? -d_angle : d_angle) * g::d_time;
-
-    quaternion qr = quaternion(
-        cos(angle * 0.5), {
-            z_axis->x * sin(angle * 0.5),
-            z_axis->y * sin(angle * 0.5),
-            z_axis->z * sin(angle * 0.5)
-        }
-    );
-
-    *rotation = qr * *rotation;
-    direction->rotate(qr);
-
-    camera_up->rotate(qr);
-    // cam.rotate(qr);
-
-    update_axes(qr);
-}
-
-void yaw(bool negative) {
-    double angle = (negative ? -d_angle : d_angle) * g::d_time;
-
-    quaternion qr = quaternion(
-        cos(angle * 0.5), {
-            y_axis->x * sin(angle * 0.5),
-            y_axis->y * sin(angle * 0.5),
-            y_axis->z * sin(angle * 0.5)
-        }
-    );
-
-    *rotation = qr * *rotation;
-    direction->rotate(qr);
-
-    camera_up->rotate(qr);
-    // cam.rotate(qr);
-
-    update_axes(qr);
-}
-
 void draw_axes() {
     glPushMatrix();
 
     glLineWidth(4.0);
-    // glColor3d(c::red.r, c::red.g, c::red.b);
-    set_material(material::red);
+    glColor3d(color::red.r, color::red.g, color::red.b);
     glBegin(GL_LINES);
     glVertex3d(-500.0, 0.0, 0.0);
     glVertex3d(500.0, 0.0, 0.0);
     glEnd();
 
-    // glColor3d(c::green.r, c::green.g, c::green.b);
-    set_material(material::green);
+    glColor3d(color::green.r, color::green.g, color::green.b);
     glBegin(GL_LINES);
     glVertex3d(0.0, -500.0, 0.0);
     glVertex3d(0.0, 500.0, 0.0);
     glEnd();
 
-    // glColor3d(c::blue.r, c::blue.g, c::blue.b);
-    set_material(material::blue);
+    glColor3d(color::blue.r, color::blue.g, color::blue.b);
     glBegin(GL_LINES);
     glVertex3d(0.0, 0.0, -500.0);
     glVertex3d(0.0, 0.0, 500.0);
@@ -160,8 +61,7 @@ void draw_axes() {
 void draw_plane() {
     glPushMatrix();
 
-    // glColor3d(c::gray.r, c::gray.g, c::gray.b);
-    set_material(material::white);
+    glColor3d(color::gray.r, color::gray.g, color::gray.b);
     glBegin(GL_QUADS);
     glVertex3d(-500.0, 0.0, 500.0);
     glVertex3d(500.0, 0.0, 500.0);
@@ -172,85 +72,52 @@ void draw_plane() {
     glPopMatrix();
 }
 
-shared_ptr<mesh_t> wall = test_obj("wall.obj");
+void pitch(bool negative, double amount) {
+    double angle = (negative ? -d_angle : d_angle) * amount * g::d_time;
+    quaternion qr = quaternion(
+        cos(to_radians(angle * 0.5)), {
+            x_axis->x * sin(to_radians(angle * 0.5)),
+            x_axis->y * sin(to_radians(angle * 0.5)),
+            x_axis->z * sin(to_radians(angle * 0.5))
+        }
+    );
 
-void draw_arena() {
-    glPushMatrix();
-    glScaled(500.0, 500.0, 500.0);
-    set_material(material::purple);
-    for (const auto& f : wall->faces) {
-        glBegin(GL_LINE_LOOP);
-        glVertex3d(f.vertices[0].position.x, f.vertices[0].position.y, f.vertices[0].position.z);
-        glVertex3d(f.vertices[1].position.x, f.vertices[1].position.y, f.vertices[1].position.z);
-        glVertex3d(f.vertices[2].position.x, f.vertices[2].position.y, f.vertices[2].position.z);
-        glEnd();
-    }
-    glPopMatrix();
+    *rotation = qr * *rotation;
+    direction = make_shared<vector3d>(forward->get_rotated(*rotation));
+    camera->rotate(*rotation);
+    update_axes(qr);
+}
 
-    glPushMatrix();
-    glRotated(90.0, -1.0, 0.0, 0.0);
-    glScaled(500.0, 500.0, 500.0);
-    set_material(material::purple);
-    for (const auto& f : wall->faces) {
-        glBegin(GL_LINE_LOOP);
-        glVertex3d(f.vertices[0].position.x, f.vertices[0].position.y, f.vertices[0].position.z);
-        glVertex3d(f.vertices[1].position.x, f.vertices[1].position.y, f.vertices[1].position.z);
-        glVertex3d(f.vertices[2].position.x, f.vertices[2].position.y, f.vertices[2].position.z);
-        glEnd();
-    }
-    glPopMatrix();
+void roll(bool negative, double amount) {
+    double angle = (negative ? -d_angle : d_angle) * amount * g::d_time;
+    quaternion qr = quaternion(
+        cos(to_radians(angle * 0.5)), {
+            z_axis->x * sin(to_radians(angle * 0.5)),
+            z_axis->y * sin(to_radians(angle * 0.5)),
+            z_axis->z * sin(to_radians(angle * 0.5))
+        }
+    );
 
-    glPushMatrix();
-    glRotated(90.0, 1.0, 0.0, 0.0);
-    glScaled(500.0, 500.0, 500.0);
-    set_material(material::purple);
-    for (const auto& f : wall->faces) {
-        glBegin(GL_LINE_LOOP);
-        glVertex3d(f.vertices[0].position.x, f.vertices[0].position.y, f.vertices[0].position.z);
-        glVertex3d(f.vertices[1].position.x, f.vertices[1].position.y, f.vertices[1].position.z);
-        glVertex3d(f.vertices[2].position.x, f.vertices[2].position.y, f.vertices[2].position.z);
-        glEnd();
-    }
-    glPopMatrix();
+    *rotation = qr * *rotation;
+    direction = make_shared<vector3d>(forward->get_rotated(*rotation));
+    camera->rotate(*rotation);
+    update_axes(qr);
+}
 
-    glPushMatrix();
-    glRotated(90.0, 0.0,0.0, 1.0);
-    glScaled(500.0, 500.0, 500.0);
-    set_material(material::purple);
-    for (const auto& f : wall->faces) {
-        glBegin(GL_LINE_LOOP);
-        glVertex3d(f.vertices[0].position.x, f.vertices[0].position.y, f.vertices[0].position.z);
-        glVertex3d(f.vertices[1].position.x, f.vertices[1].position.y, f.vertices[1].position.z);
-        glVertex3d(f.vertices[2].position.x, f.vertices[2].position.y, f.vertices[2].position.z);
-        glEnd();
-    }
-    glPopMatrix();
+void yaw(bool negative, double amount) {
+    double angle = (negative ? -d_angle : d_angle) * amount * g::d_time;
+    quaternion qr = quaternion(
+        cos(to_radians(angle * 0.5)), {
+            y_axis->x * sin(to_radians(angle * 0.5)),
+            y_axis->y * sin(to_radians(angle * 0.5)),
+            y_axis->z * sin(to_radians(angle * 0.5))
+        }
+    );
 
-    glPushMatrix();
-    glRotated(90.0, 0.0, 0.0, -1.0);
-    glScaled(500.0, 500.0, 500.0);
-    set_material(material::purple);
-    for (const auto& f : wall->faces) {
-        glBegin(GL_LINE_LOOP);
-        glVertex3d(f.vertices[0].position.x, f.vertices[0].position.y, f.vertices[0].position.z);
-        glVertex3d(f.vertices[1].position.x, f.vertices[1].position.y, f.vertices[1].position.z);
-        glVertex3d(f.vertices[2].position.x, f.vertices[2].position.y, f.vertices[2].position.z);
-        glEnd();
-    }
-    glPopMatrix();
-
-    glPushMatrix();
-    glRotated(180.0, 0.0, 0.0, 0.0);
-    glScaled(500.0, 500.0, 500.0);
-    set_material(material::purple);
-    for (const auto& f : wall->faces) {
-        glBegin(GL_LINE_LOOP);
-        glVertex3d(f.vertices[0].position.x, f.vertices[0].position.y, f.vertices[0].position.z);
-        glVertex3d(f.vertices[1].position.x, f.vertices[1].position.y, f.vertices[1].position.z);
-        glVertex3d(f.vertices[2].position.x, f.vertices[2].position.y, f.vertices[2].position.z);
-        glEnd();
-    }
-    glPopMatrix();
+    *rotation = qr * *rotation;
+    direction = make_shared<vector3d>(forward->get_rotated(*rotation));
+    camera->rotate(*rotation);
+    update_axes(qr);
 }
 
 void on_display() {
@@ -265,31 +132,56 @@ void on_display() {
 
     glMatrixMode(GL_MODELVIEW);
     draw_axes();
-    // draw_plane();
-    draw_arena();
+    draw_plane();
 
     glPushMatrix();
-    glTranslated(cube_position->x, cube_position->y, cube_position->z);
+    glTranslated(position->x, position->y, position->z);
     glMultMatrixd(rotation->to_matrix());
-    glRotated(0.0, 0.0, 1.0, 0.0);
-    glScaled(250.0, 250.0, 250.0);
+    glScaled(100.0, 100.0, 100.0);
 
-    GLfloat array[3]{static_cast<GLfloat>(cube_position->x), static_cast<GLfloat>(cube_position->y), static_cast<GLfloat>(cube_position->z)};
-    glLightfv(GL_LIGHT1, GL_POSITION, array);
-
-    set_material(material::cube_material);
-    glPushMatrix();
-    glRotated(blade_rotation, 0.0, 1.0, 0.0);
-    blades->render();
+    glColor3d(color::white.r, color::white.g, color::white.b);
+    glutWireCube(1.0);
     glPopMatrix();
 
-    set_material(material::model_material);
-    body->render();
-    tail->render();
+    glPushMatrix();
+    glColor3d(color::purple.r, color::purple.g, color::purple.b);
+    glBegin(GL_LINES);
+    glVertex3d(position->x, position->y, position->z);
+
+    vector3d target = *position + *direction * 100.0;
+    glVertex3d(target.x, target.y, target.z);
+    glEnd();
     glPopMatrix();
 
     glutSwapBuffers();
     error_check("game_init::on_display");
+}
+
+void movement() {
+    if (input::key_states[Q])
+        yaw(false, 1.0);
+    if (input::key_states[E])
+        yaw(true, 1.0);
+    if (input::key_states[W])
+        pitch(true, 1.0);
+    if (input::key_states[S])
+        pitch(false, 1.0);
+    if (input::key_states[D])
+        roll(true, 1.0);
+    if (input::key_states[A])
+        roll(false, 1.0);
+    if (input::key_states[SPACEBAR]) {
+        *position += *direction * velocity * g::d_time;
+    }
+
+    bool pitch_true = input::y_delta < 0.0;
+    bool yaw_true = input::x_delta > 0.0;
+
+    printf("pitch: %s, yaw: %s\n", pitch_true ? "yes" : "no", yaw_true ? "yes" : "no");
+
+    pitch(pitch_true, abs(input::y_delta));
+    yaw(yaw_true, abs(input::x_delta));
+    camera->move(*position - *direction * 500.0);
 }
 
 void on_reshape(int width, int height) {
@@ -301,52 +193,9 @@ void on_reshape(int width, int height) {
     glLoadIdentity();
     gluPerspective(FOV, g::width / g::height, Z_NEAR, Z_FAR);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(
-        camera_position->x, camera_position->y, camera_position->z,
-        ORIGIN_X, ORIGIN_Y, ORIGIN_Z,
-        camera_up->x, camera_up->y, camera_up->z);
-
-    // cam.look_at({ORIGIN_X, ORIGIN_Y, ORIGIN_Z});
-
+    camera->look_at({ORIGIN_X, ORIGIN_Y, ORIGIN_Z});
 
     error_check("game_init::on_reshape");
-}
-
-void update_position() {
-    if (input::key_states[Q])
-        yaw(false);
-    if (input::key_states[E])
-        yaw(true);
-    if (input::key_states[W])
-        pitch(true);
-    if (input::key_states[S])
-        pitch(false);
-    if (input::key_states[D])
-        roll(true);
-    if (input::key_states[A])
-        roll(false);
-    if (input::key_states[SPACEBAR]) {
-        *cube_position += *direction * velocity * g::d_time;
-    }
-
-    *camera_position = *cube_position - *direction * 500.0;
-    camera_position->y += 50.0;
-
-    // cam.position = *cube_position - *direction * 500.0;
-    // cam.position.y += 50.0;
-}
-
-void update_camera() {
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(
-        camera_position->x, camera_position->y, camera_position->z,
-        cube_position->x, cube_position->y, cube_position->z,
-        camera_up->x, camera_up->y, camera_up->z);
-
-    // cam.look_at(*cube_position);
 }
 
 void on_idle() {
@@ -355,47 +204,62 @@ void on_idle() {
     g::d_time = (g::c_time - l_time) / 1000;
     l_time = g::c_time;
 
-    // blade_rotation = fmod(blade_rotation + 1080.0 * g::d_time, 360.0);
-
-    update_position();
-    update_camera();
+    movement();
+    camera->update();
+    camera->look_at(*position);
     glutPostRedisplay();
     error_check("game_init::on_idle");
 }
 
 // input functions delegate calls to handler class
-void on_mouseclick(int button, int state, int x, int y) {
-    input_handler::on_mouseclick(button, state, x, y);
-    error_check("game_init::on_mouseclick");
+void on_mouse_click(int button, int state, int x, int y) {
+    input_handler::on_mouse_click(button, state, x, y);
+    error_check("game_init::on_mouse_click");
 }
 
-void on_keydown(unsigned char key, int x, int y) {
-    input_handler::on_keydown(key, x, y);
-    error_check("game_init::on_keydown");
+void on_key_down(unsigned char key, int x, int y) {
+    input_handler::on_key_down(key, x, y);
+    error_check("game_init::on_key_down");
 }
 
-void on_keyup(unsigned char key, int x, int y) {
-    input_handler::on_keyup(key, x, y);
-    error_check("game_init::on_keyup");
+void on_key_up(unsigned char key, int x, int y) {
+    input_handler::on_key_up(key, x, y);
+    error_check("game_init::on_key_up");
 }
 
-void init_lighting() {
-    glShadeModel(GL_SMOOTH);
-    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
+void on_mouse_motion(int x, int y) {
+    input_handler::on_mouse_motion(x, y);
+    error_check("game_init::on_mouse_motion");
+}
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    // glPushMatrix();
-
-    GLfloat light0_position[4]{ 0.0, 10.0, 0.0, 1.0 };
-    set_light(GL_LIGHT0, material::light0_material, light0_position);
-    GLfloat light1_position[4]{ 0.0, 10.0, 0.0, 1.0 };
-    set_light(GL_LIGHT1, material::light0_material, light1_position);
+void init_camera() {
+    vector3d camera_position{0.0, 50.0, TOTAL_UNITS / 2.0};
+    camera = make_shared<game_camera>(camera_position, quaternion::get_identity());
+}
 
 
-    // glPopMatrix();
+void test_rotation() {
+    vector3d v{ 0.0, 1.0, 0.0 };
+    // vector3d axis_t{ 0.0, 0.0, 1.0 };
+    // v.rotate(90.0, axis_t);
+
+    v.rotate(quaternion::get_identity());
+    printf("rotated_v1: %.3f, %.3f, %.3f\n", v.x, v.y, v.z);
+
+    double angle = 90.0;
+    quaternion qr = quaternion(
+        cos(to_radians(angle * 0.5)), {
+            x_axis->x * sin(to_radians(angle * 0.5)),
+            x_axis->y * sin(to_radians(angle * 0.5)),
+            x_axis->z * sin(to_radians(angle * 0.5))
+        }
+    );
+
+    quaternion q_result = quaternion::get_identity() * qr;
+
+    v.rotate(q_result);
+    printf("rotated_v2: %.3f, %.3f, %.3f\n", v.x, v.y, v.z);
+    printf("rotated_q: %.3f, %.3f, %.3f, %.3f\n", q_result.w, q_result.x, q_result.y, q_result.z);
 }
 
 void init_game(int* argcp, char** argv, game_window* window) {
@@ -415,18 +279,19 @@ void init_game(int* argcp, char** argv, game_window* window) {
     glutDisplayFunc(on_display);
     glutIdleFunc(on_idle);
 
-    glutMouseFunc(on_mouseclick);
+    glutMouseFunc(on_mouse_click);
+    glutPassiveMotionFunc(on_mouse_motion);
     glutIgnoreKeyRepeat(false);
-    glutKeyboardFunc(on_keydown);
-    glutKeyboardUpFunc(on_keyup);
+    glutKeyboardFunc(on_key_down);
+    glutKeyboardUpFunc(on_key_up);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(FOV, g::width / g::height, Z_NEAR, Z_FAR);
 
-    init_lighting();
+    init_camera();
 
-    // test_rotation();
+    test_rotation();
 
     glutMainLoop();
 }
