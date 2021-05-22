@@ -94,10 +94,13 @@ void input_handler::on_mouse_motion(int x, int y) {
     double centre_x = g::width / 2.0;
     double centre_y = g::height / 2.0;
 
+    input::x_delta = 0.0;
+    input::y_delta = 0.0;
+    if (x > centre_x - 50 && x < centre_x + 50 && y > centre_y - 50 && y < centre_x + 50) return;
+
     input::x_delta = (static_cast<double>(x) - centre_x) / centre_x;
-    // printf("x (%.3f - %.3f) / %.3f = %.3f\n", static_cast<double>(x), centre_x, centre_x, input::x_delta);
     input::y_delta = (centre_y - static_cast<double>(y)) / centre_y;
-    // printf("y (%.3f - %.3f) / %.3f = %.3f\n", static_cast<double>(y), centre_y, centre_y, input::y_delta);
+
     input::mouse_x = x;
     input::mouse_y = y;
 

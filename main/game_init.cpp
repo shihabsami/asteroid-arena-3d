@@ -174,13 +174,8 @@ void movement() {
         *position += *direction * velocity * g::d_time;
     }
 
-    bool pitch_true = input::y_delta < 0.0;
-    bool yaw_true = input::x_delta > 0.0;
-
-    printf("pitch: %s, yaw: %s\n", pitch_true ? "yes" : "no", yaw_true ? "yes" : "no");
-
-    pitch(pitch_true, abs(input::y_delta));
-    yaw(yaw_true, abs(input::x_delta));
+    pitch(input::y_delta < 0.0, abs(input::y_delta));
+    yaw(input::x_delta > 0.0, abs(input::x_delta));
     camera->move(*position - *direction * 500.0);
 }
 
