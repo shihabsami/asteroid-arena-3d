@@ -7,9 +7,9 @@
 #endif
 
 #if __APPLE__
-    #include <OpenGL/gl.height>
-    #include <OpenGL/glu.height>
-    #include <GLUT/glut.height>
+    #include <OpenGL/gl.h>
+    #include <OpenGL/glu.h>
+    #include <GLUT/glut.h>
     #define PATH_SEPARATOR "/"
 #else
     #include <GL/gl.h>
