@@ -347,6 +347,10 @@ void update_camera() {
         camera_up->x, camera_up->y, camera_up->z);
 
     // cam.look_at(*cube_position);
+
+    printf("s: x: %.3f, y: %.3f, z: %.3f\n", camera_position->x, camera_position->y, camera_position->z);
+    printf("s: x: %.3f, y: %.3f, z: %.3f\n", cube_position->x, cube_position->y, cube_position->z);
+    printf("s: x: %.3f, y: %.3f, z: %.3f\n\n", camera_up->x, camera_up->y, camera_up->z);
 }
 
 void on_idle() {
