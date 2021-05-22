@@ -21,6 +21,8 @@ public:
 
     void normalise();
 
+    static quaternion get_identity();
+
     [[nodiscard]] double get_norm() const;
 
     [[nodiscard]] double* to_matrix() const;
@@ -32,6 +34,8 @@ public:
     quaternion operator*(const quaternion& q) const;
 
     quaternion operator*(double s) const;
+
+    static quaternion slerp(const quaternion& start, const quaternion& end, double t);
 
     double w{};
     double x{};

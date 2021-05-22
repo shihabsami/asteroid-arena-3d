@@ -6,6 +6,7 @@
 #include "../utilities/input_handler.h"
 #include "../utilities/object_loader.h"
 #include "../utilities/lighting_component.h"
+#include "camera.h"
 
 #include <array>
 #include <memory>
@@ -15,42 +16,52 @@ using std::array;
 using std::shared_ptr;
 using std::make_shared;
 
-struct cube {
-    shared_ptr<array<point3d, 8>> vertices;
-    shared_ptr<array<point3d, 8>> normals;
-    shared_ptr<array<array<point3d, 3>, 12>> faces;
-
-    void draw() {
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-
-        glBegin(GL_TRIANGLES);
-
-        for (auto& face : *faces) {
-            for (int j = 0; j < face.size(); ++j) {
-                glNormal3d(normals->at(j).x, normals->at(j).y, normals->at(j).z);
-                glVertex3d(face.at(j).x, face.at(j).y, face.at(j).z);
-            }
-        }
-
-        glEnd();
-
-        glPopMatrix();
-    }
-};
-
-shared_ptr<vector3d> camera_position = make_shared<vector3d>(0.0, 0.0, TOTAL_UNITS / 2.0);
+shared_ptr<vector3d> camera_position = make_shared<vector3d>(0.0, 15.0, TOTAL_UNITS / 2.0);
 shared_ptr<vector3d> camera_up = make_shared<vector3d>(0.0, 1.0, 0.0);
+camera cam{{ 0.0, 15.0, TOTAL_UNITS / 2.0 }, { 0.0, 1.0, 0.0 }};
+
 shared_ptr<vector3d> cube_position = make_shared<vector3d>(0.0, 0.0, 0.0);
 shared_ptr<vector3d> direction = make_shared<vector3d>(0.0, 0.0, -1.0);
-shared_ptr<quaternion> rotation = make_shared<quaternion>(1.0, 0.0, 0.0, 0.0);
-double velocity = 200.0;
+shared_ptr<quaternion> rotation = make_shared<quaternion>(quaternion::get_identity());
+double velocity = 500.0;
 double d_angle = 2.0;
 double l_time;
 
 shared_ptr<vector3d> x_axis = make_shared<vector3d>(1.0, 0.0, 0.0);
 shared_ptr<vector3d> y_axis = make_shared<vector3d>(0.0, 1.0, 0.0);
 shared_ptr<vector3d> z_axis = make_shared<vector3d>(0.0, 0.0, 1.0);
+
+void test_rotation() {
+    vector3d v_t{ 1.0, 0.0, 0.0 };
+    vector3d axis_t{ 0.0, 0.0, 1.0 };
+    // v_t.rotate(90.0, axis_t);
+
+    quaternion q{ 1.0, 0.0, 0.0, 0.0 };
+    v_t.rotate(q);
+
+    printf("%.3f, %.3f, %.3f\n", v_t.x, v_t.y, v_t.z);
+}
+
+void test_quaternion() {
+    quaternion q_x{ 0.707, 0.707, 0.0, 0.0 };
+    quaternion q_z{ 0.707, 0.0, 0.0, 0.707 };
+
+    quaternion q_result = quaternion::slerp(q_x, q_z, 0.5);
+
+    printf("%.3f, %.3f, %.3f, %.3f\n", q_result.w, q_result.x, q_result.y, q_result.z);
+}
+
+shared_ptr<mesh_t> test_obj(const char* filename) {
+    stringstream stream;
+    stream << ".." << PATH_SEPARATOR << "files" << PATH_SEPARATOR << "models" << PATH_SEPARATOR << filename;
+    string filename_str = stream.str();
+    return load_obj(filename_str.c_str());
+}
+
+shared_ptr<mesh_t> body = test_obj("helicopter\\body.obj");
+shared_ptr<mesh_t> blades = test_obj("helicopter\\blades.obj");
+shared_ptr<mesh_t> tail = test_obj("helicopter\\tail.obj");
+double blade_rotation = 0.0;
 
 void update_axes(const quaternion& q) {
     x_axis->rotate(q);
@@ -71,7 +82,10 @@ void pitch(bool negative) {
 
     *rotation = qr * *rotation;
     direction->rotate(qr);
+
     camera_up->rotate(qr);
+    // cam.rotate(qr);
+
     update_axes(qr);
 }
 
@@ -88,7 +102,10 @@ void roll(bool negative) {
 
     *rotation = qr * *rotation;
     direction->rotate(qr);
+
     camera_up->rotate(qr);
+    // cam.rotate(qr);
+
     update_axes(qr);
 }
 
@@ -105,36 +122,33 @@ void yaw(bool negative) {
 
     *rotation = qr * *rotation;
     direction->rotate(qr);
+
     camera_up->rotate(qr);
+    // cam.rotate(qr);
+
     update_axes(qr);
-}
-
-void test_rotation() {
-    vector3d v_t{ 1.0, 0.0, 0.0 };
-    // quaternion q_t{ 0.707, 0.0, 0.0, 0.707 };
-    vector3d axis_t{ 0.0, 0.0, 1.0 };
-    v_t.rotate(90.0, axis_t);
-
-    printf("%.3f, %.3f, %.3f\n", v_t.x, v_t.y, v_t.z);
 }
 
 void draw_axes() {
     glPushMatrix();
 
-    glLineWidth(2.0);
-    glColor3d(c::red.r, c::red.g, c::red.b);
+    glLineWidth(4.0);
+    // glColor3d(c::red.r, c::red.g, c::red.b);
+    set_material(material::red);
     glBegin(GL_LINES);
     glVertex3d(-500.0, 0.0, 0.0);
     glVertex3d(500.0, 0.0, 0.0);
     glEnd();
 
-    glColor3d(c::green.r, c::green.g, c::green.b);
+    // glColor3d(c::green.r, c::green.g, c::green.b);
+    set_material(material::green);
     glBegin(GL_LINES);
     glVertex3d(0.0, -500.0, 0.0);
     glVertex3d(0.0, 500.0, 0.0);
     glEnd();
 
-    glColor3d(c::blue.r, c::blue.g, c::blue.b);
+    // glColor3d(c::blue.r, c::blue.g, c::blue.b);
+    set_material(material::blue);
     glBegin(GL_LINES);
     glVertex3d(0.0, 0.0, -500.0);
     glVertex3d(0.0, 0.0, 500.0);
@@ -146,7 +160,8 @@ void draw_axes() {
 void draw_plane() {
     glPushMatrix();
 
-    glColor3d(c::gray.r, c::gray.g, c::gray.b);
+    // glColor3d(c::gray.r, c::gray.g, c::gray.b);
+    set_material(material::white);
     glBegin(GL_QUADS);
     glVertex3d(-500.0, 0.0, 500.0);
     glVertex3d(500.0, 0.0, 500.0);
@@ -157,68 +172,120 @@ void draw_plane() {
     glPopMatrix();
 }
 
-vector<vertex> test_obj() {
-    stringstream stream;
-    stream << ".." << PATH_SEPARATOR << "files" << PATH_SEPARATOR << "models" << PATH_SEPARATOR << "cube.obj";
-    string filename = stream.str();
-    return load_obj(filename.c_str());
-}
+shared_ptr<mesh_t> wall = test_obj("wall.obj");
 
-vector<vertex> vertices = test_obj();
+void draw_arena() {
+    glPushMatrix();
+    glScaled(500.0, 500.0, 500.0);
+    set_material(material::purple);
+    for (const auto& f : wall->faces) {
+        glBegin(GL_LINE_LOOP);
+        glVertex3d(f.vertices[0].position.x, f.vertices[0].position.y, f.vertices[0].position.z);
+        glVertex3d(f.vertices[1].position.x, f.vertices[1].position.y, f.vertices[1].position.z);
+        glVertex3d(f.vertices[2].position.x, f.vertices[2].position.y, f.vertices[2].position.z);
+        glEnd();
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(90.0, -1.0, 0.0, 0.0);
+    glScaled(500.0, 500.0, 500.0);
+    set_material(material::purple);
+    for (const auto& f : wall->faces) {
+        glBegin(GL_LINE_LOOP);
+        glVertex3d(f.vertices[0].position.x, f.vertices[0].position.y, f.vertices[0].position.z);
+        glVertex3d(f.vertices[1].position.x, f.vertices[1].position.y, f.vertices[1].position.z);
+        glVertex3d(f.vertices[2].position.x, f.vertices[2].position.y, f.vertices[2].position.z);
+        glEnd();
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(90.0, 1.0, 0.0, 0.0);
+    glScaled(500.0, 500.0, 500.0);
+    set_material(material::purple);
+    for (const auto& f : wall->faces) {
+        glBegin(GL_LINE_LOOP);
+        glVertex3d(f.vertices[0].position.x, f.vertices[0].position.y, f.vertices[0].position.z);
+        glVertex3d(f.vertices[1].position.x, f.vertices[1].position.y, f.vertices[1].position.z);
+        glVertex3d(f.vertices[2].position.x, f.vertices[2].position.y, f.vertices[2].position.z);
+        glEnd();
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(90.0, 0.0,0.0, 1.0);
+    glScaled(500.0, 500.0, 500.0);
+    set_material(material::purple);
+    for (const auto& f : wall->faces) {
+        glBegin(GL_LINE_LOOP);
+        glVertex3d(f.vertices[0].position.x, f.vertices[0].position.y, f.vertices[0].position.z);
+        glVertex3d(f.vertices[1].position.x, f.vertices[1].position.y, f.vertices[1].position.z);
+        glVertex3d(f.vertices[2].position.x, f.vertices[2].position.y, f.vertices[2].position.z);
+        glEnd();
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(90.0, 0.0, 0.0, -1.0);
+    glScaled(500.0, 500.0, 500.0);
+    set_material(material::purple);
+    for (const auto& f : wall->faces) {
+        glBegin(GL_LINE_LOOP);
+        glVertex3d(f.vertices[0].position.x, f.vertices[0].position.y, f.vertices[0].position.z);
+        glVertex3d(f.vertices[1].position.x, f.vertices[1].position.y, f.vertices[1].position.z);
+        glVertex3d(f.vertices[2].position.x, f.vertices[2].position.y, f.vertices[2].position.z);
+        glEnd();
+    }
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(180.0, 0.0, 0.0, 0.0);
+    glScaled(500.0, 500.0, 500.0);
+    set_material(material::purple);
+    for (const auto& f : wall->faces) {
+        glBegin(GL_LINE_LOOP);
+        glVertex3d(f.vertices[0].position.x, f.vertices[0].position.y, f.vertices[0].position.z);
+        glVertex3d(f.vertices[1].position.x, f.vertices[1].position.y, f.vertices[1].position.z);
+        glVertex3d(f.vertices[2].position.x, f.vertices[2].position.y, f.vertices[2].position.z);
+        glEnd();
+    }
+    glPopMatrix();
+}
 
 void on_display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glClearColor
         (
-            static_cast<GLclampf>(c::black.r),
-            static_cast<GLclampf>(c::black.g),
-            static_cast<GLclampf>(c::black.b), 1.0
+            static_cast<GLclampf>(color::black.r),
+            static_cast<GLclampf>(color::black.g),
+            static_cast<GLclampf>(color::black.b), 1.0
         );
 
     glMatrixMode(GL_MODELVIEW);
     draw_axes();
-    draw_plane();
+    // draw_plane();
+    draw_arena();
 
     glPushMatrix();
     glTranslated(cube_position->x, cube_position->y, cube_position->z);
     glMultMatrixd(rotation->to_matrix());
-    glScaled(50.0, 50.0, 50.0);
-    glColor3d(c::purple.r, c::purple.g, c::purple.b);
-    glutWireCube(1.0);
+    glRotated(0.0, 0.0, 1.0, 0.0);
+    glScaled(250.0, 250.0, 250.0);
+
+    GLfloat array[3]{static_cast<GLfloat>(cube_position->x), static_cast<GLfloat>(cube_position->y), static_cast<GLfloat>(cube_position->z)};
+    glLightfv(GL_LIGHT1, GL_POSITION, array);
+
+    set_material(material::cube_material);
+    glPushMatrix();
+    glRotated(blade_rotation, 0.0, 1.0, 0.0);
+    blades->render();
     glPopMatrix();
 
-    glPushMatrix();
-    glScaled(100.0, 100.0, 100.0);
-    glColor3d(c::white.r, c::white.g, c::white.b);
-    glBegin(GL_LINES);
-    glVertex3d(0.0, 0.0, 0.0);
-    glVertex3d(direction->x, direction->y, direction->z);
-    glEnd();
-    glPopMatrix();
-
-    material model_material{
-        { 0.2f, 0.2f, 0.2f, 1.0f },
-        { 1.0f, 0.0f, 0.0f, 1.0f },
-        { 0.0f, 0.0f, 0.0f, 1.0f },
-        { 0.0f, 0.0f, 0.0f, 1.0f },
-        16.0f
-    };
-
-    glPushMatrix();
-    glTranslated(0.0, 25.0, 0.0);
-    glScaled(50.0, 50.0, 50.0);
-    gl_material(model_material);
-    for (int i = 0; i < vertices.size(); i += 3) {
-        glBegin(GL_TRIANGLES);
-        glNormal3d(vertices.at(i).normal.x, vertices.at(i).normal.y, vertices.at(i).normal.z);
-        glVertex3d(vertices.at(i).position.x, vertices.at(i).position.y, vertices.at(i).position.z);
-        glNormal3d(vertices.at(i + 1).normal.x, vertices.at(i + 1).normal.y, vertices.at(i + 1).normal.z);
-        glVertex3d(vertices.at(i + 1).position.x, vertices.at(i + 1).position.y, vertices.at(i + 1).position.z);
-        glNormal3d(vertices.at(i + 2).normal.x, vertices.at(i + 2).normal.y, vertices.at(i + 2).normal.z);
-        glVertex3d(vertices.at(i + 2).position.x, vertices.at(i + 2).position.y, vertices.at(i + 2).position.z);
-        glEnd();
-    }
+    set_material(material::model_material);
+    body->render();
+    tail->render();
     glPopMatrix();
 
     glutSwapBuffers();
@@ -241,6 +308,9 @@ void on_reshape(int width, int height) {
         ORIGIN_X, ORIGIN_Y, ORIGIN_Z,
         camera_up->x, camera_up->y, camera_up->z);
 
+    // cam.look_at({ORIGIN_X, ORIGIN_Y, ORIGIN_Z});
+
+
     error_check("game_init::on_reshape");
 }
 
@@ -261,20 +331,11 @@ void update_position() {
         *cube_position += *direction * velocity * g::d_time;
     }
 
-    *camera_position = *cube_position - *direction * 250.0;
+    *camera_position = *cube_position - *direction * 500.0;
+    camera_position->y += 50.0;
 
-//    auto* f = rotation->to_matrix();
-//    printf(
-//        "%.3f %.3f %.3f %.3f\n%.3f %.3f %.3f, %.3f\n%.3f %.3f %.3f %.3f\n%.3f %.3f %.3f %.3f\n\n",
-//        f[0], f[1], f[2], f[3],
-//        f[4], f[5], f[6], f[7],
-//        f[8], f[9], f[10], f[11],
-//        f[12], f[13], f[14], f[15]);
-//
-//    printf("direction.x: %3f, direction.y: %.3f, direction.z: %.3f\n", direction->x, direction->y, direction->z);
-//
-//    printf("rotation.n: %f\n", rotation->get_norm());
-//    printf("direction.m: %f\n", direction->get_magnitude());
+    // cam.position = *cube_position - *direction * 500.0;
+    // cam.position.y += 50.0;
 }
 
 void update_camera() {
@@ -284,13 +345,17 @@ void update_camera() {
         camera_position->x, camera_position->y, camera_position->z,
         cube_position->x, cube_position->y, cube_position->z,
         camera_up->x, camera_up->y, camera_up->z);
+
+    // cam.look_at(*cube_position);
 }
 
 void on_idle() {
-    // update current and delta time
+    // rotate current and delta time
     g::c_time = static_cast<double>(glutGet(GLUT_ELAPSED_TIME));
     g::d_time = (g::c_time - l_time) / 1000;
     l_time = g::c_time;
+
+    // blade_rotation = fmod(blade_rotation + 1080.0 * g::d_time, 360.0);
 
     update_position();
     update_camera();
@@ -316,20 +381,21 @@ void on_keyup(unsigned char key, int x, int y) {
 
 void init_lighting() {
     glShadeModel(GL_SMOOTH);
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
 
-    material light0_material{
-        { 0.4f, 0.4f, 0.4f, 1.0f },
-        { 0.8f, 0.8f, 0.8f, 1.0f },
-        { 0.0f, 0.0f, 0.0f, 1.0f },
-        { 0.0f, 0.0f, 0.0f, 1.0f },
-        16.0f
-    };
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    // glPushMatrix();
 
-    point3d light0_position{ 0.0, 100.0, 0.0};
+    GLfloat light0_position[4]{ 0.0, 10.0, 0.0, 1.0 };
+    set_light(GL_LIGHT0, material::light0_material, light0_position);
+    GLfloat light1_position[4]{ 0.0, 10.0, 0.0, 1.0 };
+    set_light(GL_LIGHT1, material::light0_material, light1_position);
 
-    gl_light(GL_LIGHT0, light0_material, light0_position);
+
+    // glPopMatrix();
 }
 
 void init_game(int* argcp, char** argv, game_window* window) {
@@ -357,10 +423,10 @@ void init_game(int* argcp, char** argv, game_window* window) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(FOV, g::width / g::height, Z_NEAR, Z_FAR);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
 
     init_lighting();
+
+    // test_rotation();
 
     glutMainLoop();
 }

@@ -29,19 +29,18 @@
 
 // the total number of units in the z axis when aspect ratio is 1.0
 #define TOTAL_UNITS   1000
-#define MAX_ANGLE   360.0
 
 // constants used in transformations
 #define ORIGIN_X       0
 #define ORIGIN_Y       0
 #define ORIGIN_Z       0
 #define Z_NEAR         1.0
-#define Z_FAR          TOTAL_UNITS + Z_NEAR
+#define Z_FAR          2 * TOTAL_UNITS + Z_NEAR
 #define FOV            45.0
 
 /*
  * arena width should ideally be within TOTAL_UNITS else it shall exceed
- * the coordinate system'w maximum size and shall not be fully visible
+ * the coordinate system's maximum size and shall not be fully visible
  */
 #define ARENA_WIDTH                800
 #define ARENA_HEIGHT               800
@@ -49,38 +48,16 @@
 #define ARENA_WALL_WIDTH           4.0
 #define WALL_COLLISION_THRESHOLD   100
 
-// global namespace containing all global variables used
+
+#define CAMERA_LAG 1.0
+
+
+// g namespace containing all g variables used
 namespace g {
     extern double width;
     extern double height;
-    extern double x_units;
-    extern double y_units;
     extern double d_time;
     extern double c_time;
-    extern double arena_x_min;
-    extern double arena_x_max;
-    extern double arena_y_min;
-    extern double arena_y_max;
-    extern double arena_z_min;
-    extern double arena_z_max;
 }
-
-struct color_t {
-    GLdouble r, g, b;
-};
-
-// color namespace, containing all the colors used
-namespace c {
-    extern color_t white;
-    extern color_t black;
-    extern color_t gray;
-    extern color_t red;
-    extern color_t green;
-    extern color_t blue;
-    extern color_t purple;
-}
-
-// function to check errors
-extern void error_check(const char* location);
 
 #endif // !CONFIG_H

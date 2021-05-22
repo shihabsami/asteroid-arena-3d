@@ -1,18 +1,17 @@
 #ifndef WALL_H
 #define WALL_H
 
-#include "../math/point3d.h"
 #include "../main/config.h"
-
+#include "../utilities/lighting_component.h"
+#include "../utilities/mesh_component.h"
 
 class wall {
 public:
-    wall(const point3d* points, const color_t* color);
-
+    wall(mesh_t mesh, const material_t& material);
     void draw() const;
 
-    const point3d* points;
-    const color_t* color;
+    mesh_t mesh;
+    material_t material;
 };
 
 #endif // !WALL_H

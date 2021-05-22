@@ -17,4 +17,14 @@
     #include <GL/glut.h>
 #endif
 
+#include <iostream>
+
+// checks errors with the help of opengl functions
+static void error_check(const char* location) {
+    GLenum error;
+    while ((error = glGetError()) != GL_NO_ERROR)
+        printf("%s: %s\n", location, gluErrorString(error));
+}
+
+
 #endif // !GRAPHICS_H
