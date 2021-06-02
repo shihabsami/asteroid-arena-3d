@@ -20,45 +20,52 @@ namespace color {
 }
 
 struct material_t {
-    const GLfloat ambient[4];
-    const GLfloat diffuse[4];
-    const GLfloat specular[4];
-    const GLfloat emission[4];
-    const GLfloat shininess;
+    GLfloat ambient[4];
+    GLfloat diffuse[4];
+    GLfloat specular[4];
+    GLfloat emission[4];
+    GLfloat shininess;
 };
 
 namespace material {
-    const material_t white{
+    const material_t light{
+        { 1.0f, 1.0f, 1.0f, 1.0f },
         { 1.0f, 1.0f, 1.0f, 1.0f },
         { 1.0f, 1.0f, 1.0f, 1.0f },
         { 0.0f, 0.0f, 0.0f, 1.0f },
+        0.0 };
+
+    const material_t white{
+        { 1.0f, 1.0f, 1.0f, 1.0f },
+        { 1.0f, 1.0f, 1.0f, 1.0f },
+        { 1.0f, 1.0f, 1.0f, 1.0f },
         { 0.0f, 0.0f, 0.0f, 1.0f },
         0.0 };
 
     const material_t red{
-        { 0.4f, 0.0f, 0.0f, 1.0f },
+        { 1.0f, 0.0f, 0.0f, 1.0f },
         { 1.0f, 0.0f, 0.0f, 1.0f },
         { 0.0f, 0.0f, 0.0f, 1.0f },
-        { 0.0f, 0.0f, 0.0f, 1.0f },
+        { 0.4f, 0.0f, 0.0f, 1.0f },
         0.0 };
 
     const material_t green{
-        { 0.0f, 0.4f, 0.0f, 1.0f },
+        { 0.0f, 1.0f, 0.0f, 1.0f },
         { 0.0f, 1.0f, 0.0f, 1.0f },
         { 0.0f, 0.0f, 0.0f, 1.0f },
-        { 0.0f, 0.0f, 0.0f, 1.0f },
+        { 0.0f, 0.4f, 0.0f, 1.0f },
         0.0 };
 
     const material_t blue{
-        { 0.0f, 0.0f, 0.4f, 1.0f },
+        { 0.0f, 0.0f, 1.0f, 1.0f },
         { 0.0f, 0.0f, 1.0f, 1.0f },
         { 0.0f, 0.0f, 0.0f, 1.0f },
-        { 0.0f, 0.0f, 0.0f, 1.0f },
+        { 0.0f, 0.0f, 0.4f, 1.0f },
         0.0 };
 
     const material_t purple{
-        { 0.4f, 0.0f, 0.4f, 1.0f },
-        { 1.0f, 0.0f, 1.0f, 1.0f },
+        { 0.2f, 0.0f, 0.2f, 1.0f },
+        { 0.6f, 0.0f, 0.6f, 1.0f },
         { 0.0f, 0.0f, 0.0f, 1.0f },
         { 0.0f, 0.0f, 0.0f, 1.0f },
         0.0 };
@@ -86,6 +93,14 @@ namespace material {
         { 0.2f, 0.2f, 0.2f, 1.0f },
         76.8f
     };
+
+    const material_t wall_material{
+        { 1.0f, 1.0f, 1.0f, 0.4f },
+        { 1.0f, 1.0f, 1.0f, 0.4f },
+        { 1.0f, 1.0f, 1.0f, 0.4f },
+        { 0.0f, 0.0f, 0.0f, 0.4f },
+        0.0
+    };
 }
 
 static void set_color(color_t color) {
@@ -93,10 +108,16 @@ static void set_color(color_t color) {
 }
 
 static void set_light(GLenum light, const material_t& m, const GLfloat* position) {
+//    glMatrixMode(GL_MODELVIEW);
+//    glPushMatrix();
+
     glLightfv(light, GL_AMBIENT, m.ambient);
     glLightfv(light, GL_DIFFUSE, m.diffuse);
     glLightfv(light, GL_SPECULAR, m.specular);
     glLightfv(light, GL_POSITION, position);
+    glEnable(light);
+
+//    glPopMatrix();
 }
 
 static void set_material(const material_t& m) {
@@ -105,6 +126,7 @@ static void set_material(const material_t& m) {
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, m.specular);
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, m.emission);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, m.shininess);
+    glColor3d(color::white.r, color::white.g, color::white.b);
 }
 
 #endif // !LIGHTING_COMPONENT_H

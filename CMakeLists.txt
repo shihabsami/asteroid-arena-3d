@@ -25,9 +25,15 @@ set(SOURCE_FILES main/main.cpp
         math/vector3d.cpp math/vector3d.h
         math/quaternion.cpp math/quaternion.h
         utilities/input_handler.cpp utilities/input_handler.h
+        objects/game_arena.cpp objects/game_arena.h
+        objects/wall.cpp objects/wall.h
         utilities/mesh_component.h
+        utilities/lighting_component.h
         utilities/object_loader.h
-        utilities/lighting_component.h utilities/mesh_component.h main/graphics.h
+        main/draw_sphere.h main/draw_ico.h
+        objects/game_object.h objects/game_object.cpp
+        objects/spaceship.h objects/spaceship.cpp
+        utilities/object_register.h utilities/object_register.cpp
         )
 
 add_executable(Asteroid_Arena_3D ${SOURCE_FILES})

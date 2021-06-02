@@ -25,6 +25,10 @@ void vector3d::normalise() {
     m = get_magnitude();
 }
 
+vector3d vector3d::get_normalised() const {
+    return { x / m, y / m, z / m };
+}
+
 double vector3d::get_distance(const vector3d& v) const {
     return std::sqrt((x - v.x) * (x - v.x) + (y - v.y) * (y - v.y) + (z - v.z) * (z - v.z));
 }
@@ -128,4 +132,10 @@ vector3d& vector3d::operator/=(double s) {
     z /= s;
     m = get_magnitude();
     return *this;
+}
+
+bool vector3d::operator==(const vector3d& v) const {
+
+
+    return v.x;
 }

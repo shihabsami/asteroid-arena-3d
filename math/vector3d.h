@@ -13,8 +13,11 @@ public:
 
     vector3d& operator=(const vector3d& v);
 
-    // normalize the vector i.e. having magnitude of 1.0
+    // normalise the vector i.e. having magnitude of 1.0
     void normalise();
+
+    // get this vector normalised
+    [[nodiscard]] vector3d get_normalised() const;
 
     [[nodiscard]] double get_magnitude() const;
 
@@ -39,6 +42,8 @@ public:
     void rotate(const quaternion& q);
 
     static vector3d lerp(const vector3d& start, const vector3d& end, double t);
+
+    bool operator==(const vector3d& v) const;
 
     // operator overloads to do scalar operations
     vector3d operator+(const vector3d& v) const;

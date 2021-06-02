@@ -34,22 +34,26 @@
 #define ORIGIN_X       0
 #define ORIGIN_Y       0
 #define ORIGIN_Z       0
-#define Z_NEAR         1.0
-#define Z_FAR          2 * TOTAL_UNITS + Z_NEAR
+#define Z_NEAR         0.1
+#define Z_FAR          5 * TOTAL_UNITS + Z_NEAR
 #define FOV            45.0
 
 /*
  * arena width should ideally be within TOTAL_UNITS else it shall exceed
  * the coordinate system's maximum size and shall not be fully visible
  */
-#define ARENA_WIDTH                800
-#define ARENA_HEIGHT               800
-#define ARENA_LENGTH               800
-#define ARENA_WALL_WIDTH           4.0
+#define ARENA_WIDTH                1000.0
+#define ARENA_HEIGHT               1000.0
+#define ARENA_LENGTH               1000.0
+#define ARENA_WALL_WIDTH           1.0
 #define WALL_COLLISION_THRESHOLD   100
 
 
+
 #define CAMERA_LAG 5.0
+
+
+#define SPACESHIP_STEERING_MODIFIER 90.0 // delta angle per second
 
 
 // g namespace containing all g variables used

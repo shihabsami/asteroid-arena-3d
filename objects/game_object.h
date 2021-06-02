@@ -3,6 +3,7 @@
 
 #include "../math/vector3d.h"
 #include "../math/quaternion.h"
+#include "../utilities/mesh_component.h"
 
 #include <memory>
 
@@ -22,8 +23,10 @@ public:
 
     // construct game object with specified parameters
     game_object(
-        const vector3d& position, const vector3d& direction,
-        const vector3d& scale, const quaternion& rotation, double velocity);
+        shared_ptr<mesh_t>& mesh, shared_ptr<vector3d>& position, shared_ptr<quaternion>& rotation,
+        shared_ptr<vector3d>& scale, shared_ptr<vector3d>& direction, double velocity);
+
+    ~game_object();
 
     // initialise the game object
     virtual void init() = 0;
@@ -34,17 +37,19 @@ public:
     // draw the game object
     virtual void draw() = 0;
 
+    shared_ptr<mesh_t> mesh;
+
     // position of the game object
-    vector3d position;
+    shared_ptr<vector3d> position;
 
     // direction of the game object as an unit vector
-    vector3d direction;
+    shared_ptr<vector3d> direction;
 
     // scale of the game object
-    vector3d scale;
+    shared_ptr<vector3d> scale;
 
     // rotation of the game object as an unit quaternion
-    quaternion rotation;
+    shared_ptr<quaternion> rotation;
 
     // v of the game object in world coordinates
     double velocity{};

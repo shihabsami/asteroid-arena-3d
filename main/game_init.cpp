@@ -3,6 +3,17 @@
 #include "game_camera.h"
 #include "../math/game_math.h"
 #include "../utilities/input_handler.h"
+#include "../utilities/mesh_component.h"
+#include "../utilities/object_loader.h"
+#include "../objects/game_arena.h"
+#include "../utilities/object_register.h"
+#include "draw_sphere.h"
+
+#define GL_CLAMP_TO_EDGE 0x812F
+#define STB_IMAGE_IMPLEMENTATION
+
+#include "../stb_image.h"
+#include "draw_sphere.h"
 
 #include <array>
 #include <memory>
@@ -15,17 +26,38 @@ using std::make_shared;
 shared_ptr<vector3d> forward = make_shared<vector3d>(0.0, 0.0, -1.0);
 
 shared_ptr<game_camera> camera;
-shared_ptr<vector3d> position = make_shared<vector3d>(0.0, 50.0, 0.0);
-shared_ptr<vector3d> direction = make_shared<vector3d>(0.0, 0.0, -1.0);
+shared_ptr<vector3d> cube_position = make_shared<vector3d>(0.0, 50.0, 0.0);
+shared_ptr<vector3d> cube_direction = make_shared<vector3d>(0.0, 0.0, -1.0);
 shared_ptr<quaternion> rotation = make_shared<quaternion>(quaternion::get_identity());
+
+shared_ptr<game_arena> arena;
 
 double velocity = 500.0;
 double d_angle = 90.0;
 double l_time;
+bool mouse_control = false;
+
+
+quaternion old_cam;
+quaternion new_cam;
 
 shared_ptr<vector3d> x_axis = make_shared<vector3d>(1.0, 0.0, 0.0);
 shared_ptr<vector3d> y_axis = make_shared<vector3d>(0.0, 1.0, 0.0);
 shared_ptr<vector3d> z_axis = make_shared<vector3d>(0.0, 0.0, 1.0);
+
+GLuint tex_front;
+GLuint tex_back;
+GLuint tex_top;
+GLuint tex_bottom;
+GLuint tex_left;
+GLuint tex_right;
+
+shared_ptr<mesh_t> ship;
+GLuint ship_tex;
+
+shared_ptr<mesh_t> body;
+shared_ptr<mesh_t> wing_left;
+shared_ptr<mesh_t> wing_right;
 
 void update_axes(const quaternion& q) {
     x_axis->rotate(q);
@@ -34,22 +66,23 @@ void update_axes(const quaternion& q) {
 }
 
 void draw_axes() {
+    glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
     glLineWidth(4.0);
-    glColor3d(color::red.r, color::red.g, color::red.b);
+    set_material(material::red);
     glBegin(GL_LINES);
     glVertex3d(-500.0, 0.0, 0.0);
     glVertex3d(500.0, 0.0, 0.0);
     glEnd();
 
-    glColor3d(color::green.r, color::green.g, color::green.b);
+    set_material(material::green);
     glBegin(GL_LINES);
     glVertex3d(0.0, -500.0, 0.0);
     glVertex3d(0.0, 500.0, 0.0);
     glEnd();
 
-    glColor3d(color::blue.r, color::blue.g, color::blue.b);
+    set_material(material::blue);
     glBegin(GL_LINES);
     glVertex3d(0.0, 0.0, -500.0);
     glVertex3d(0.0, 0.0, 500.0);
@@ -58,18 +91,100 @@ void draw_axes() {
     glPopMatrix();
 }
 
-void draw_plane() {
+void draw_skybox() {
+    glPushAttrib(GL_ENABLE_BIT);
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_BLEND);
+
     glPushMatrix();
 
-    glColor3d(color::gray.r, color::gray.g, color::gray.b);
+    // front
+    glBindTexture(GL_TEXTURE_2D, tex_front);
     glBegin(GL_QUADS);
-    glVertex3d(-500.0, 0.0, 500.0);
-    glVertex3d(500.0, 0.0, 500.0);
-    glVertex3d(500.0, 0.0, -500.0);
-    glVertex3d(-500.0, 0.0, -500.0);
+    glTexCoord2d(0.0, 0.0);
+    glVertex3d(-1.0, -1.0, -1.0);
+    glTexCoord2d(1.0, 0.0);
+    glVertex3d(1.0, -1.0, -1.0);
+    glTexCoord2d(1.0, 1.0);
+    glVertex3d(1.0, 1.0, -1.0);
+    glTexCoord2d(0.0, 1.0);
+    glVertex3d(-1.0, 1.0, -1.0);
+    glEnd();
+
+    // back
+    glBindTexture(GL_TEXTURE_2D, tex_back);
+    glBegin(GL_QUADS);
+    glTexCoord2d(0.0, 0.0);
+    glVertex3d(1.0, -1.0, 1.0);
+    glTexCoord2d(1.0, 0.0);
+    glVertex3d(-1.0, -1.0, 1.0);
+    glTexCoord2d(1.0, 1.0);
+    glVertex3d(-1.0, 1.0, 1.0);
+    glTexCoord2d(0.0, 1.0);
+    glVertex3d(1.0, 1.0, 1.0);
+    glEnd();
+
+    // top
+    glBindTexture(GL_TEXTURE_2D, tex_top);
+    glBegin(GL_QUADS);
+    glTexCoord2d(0.0, 0.0);
+    glVertex3d(-1.0, 1.0, -1.0);
+    glTexCoord2d(1.0, 0.0);
+    glVertex3d(1.0, 1.0, -1.0);
+    glTexCoord2d(1.0, 1.0);
+    glVertex3d(1.0, 1.0, 1.0);
+    glTexCoord2d(0.0, 1.0);
+    glVertex3d(-1.0, 1.0, 1.0);
+    glEnd();
+
+    // bottom
+    glBindTexture(GL_TEXTURE_2D, tex_bottom);
+    glBegin(GL_QUADS);
+    glTexCoord2d(0.0, 0.0);
+    glVertex3d(-1.0, -1.0, 1.0);
+    glTexCoord2d(1.0, 0.0);
+    glVertex3d(1.0, -1.0, 1.0);
+    glTexCoord2d(1.0, 1.0);
+    glVertex3d(1.0, -1.0, -1.0);
+    glTexCoord2d(0.0, 1.0);
+    glVertex3d(-1.0, -1.0, -1.0);
+    glEnd();
+
+    // left
+    glBindTexture(GL_TEXTURE_2D, tex_left);
+    glBegin(GL_QUADS);
+    glTexCoord2d(0.0, 0.0);
+    glVertex3d(-1.0, -1.0, 1.0);
+    glTexCoord2d(1.0, 0.0);
+    glVertex3d(-1.0, -1.0, -1.0);
+    glTexCoord2d(1.0, 1.0);
+    glVertex3d(-1.0, 1.0, -1.0);
+    glTexCoord2d(0.0, 1.0);
+    glVertex3d(-1.0, 1.0, 1.0);
+    glEnd();
+
+    // right
+    glBindTexture(GL_TEXTURE_2D, tex_right);
+    glBegin(GL_QUADS);
+    glTexCoord2d(0.0, 0.0);
+    glVertex3d(1.0, -1.0, -1.0);
+    glTexCoord2d(1.0, 0.0);
+    glVertex3d(1.0, -1.0, 1.0);
+    glTexCoord2d(1.0, 1.0);
+    glVertex3d(1.0, 1.0, 1.0);
+    glTexCoord2d(0.0, 1.0);
+    glVertex3d(1.0, 1.0, -1.0);
     glEnd();
 
     glPopMatrix();
+
+    glEnable(GL_BLEND);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_2D);
+    glPopAttrib();
 }
 
 void pitch(bool negative, double amount) {
@@ -83,7 +198,7 @@ void pitch(bool negative, double amount) {
     );
 
     *rotation = qr * *rotation;
-    direction = make_shared<vector3d>(forward->get_rotated(*rotation));
+    cube_direction = make_shared<vector3d>(forward->get_rotated(*rotation));
     camera->rotate(*rotation);
     update_axes(qr);
 }
@@ -99,7 +214,7 @@ void roll(bool negative, double amount) {
     );
 
     *rotation = qr * *rotation;
-    direction = make_shared<vector3d>(forward->get_rotated(*rotation));
+    cube_direction = make_shared<vector3d>(forward->get_rotated(*rotation));
     camera->rotate(*rotation);
     update_axes(qr);
 }
@@ -115,10 +230,41 @@ void yaw(bool negative, double amount) {
     );
 
     *rotation = qr * *rotation;
-    direction = make_shared<vector3d>(forward->get_rotated(*rotation));
+    cube_direction = make_shared<vector3d>(forward->get_rotated(*rotation));
     camera->rotate(*rotation);
     update_axes(qr);
 }
+
+double l_rot = 0.0;
+double r_rot = 0.0;
+
+void draw_ship() {
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, ship_tex);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glScaled(10.0, 10.0, 10.0);
+    body->render();
+
+    glPushMatrix();
+    glRotated(l_rot, 0.0, 0.0, 1.0);
+    wing_left->render();
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(r_rot, 0.0, 0.0, 1.0);
+    wing_right->render();
+    glPopMatrix();
+
+    glPopMatrix();
+
+    glDisable(GL_TEXTURE_2D);
+}
+
+GLuint particle_tex;
+GLuint moon_tex;
+GLuint uv_grid_tex;
 
 void on_display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -131,24 +277,124 @@ void on_display() {
         );
 
     glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    camera->orient();
+    draw_skybox();
+    camera->translate();
+
+    GLfloat light0_position[4]{ -0.8, 0.8, -0.8, 0.0 };
+    set_light(GL_LIGHT0, material::light, light0_position);
+
     draw_axes();
-    draw_plane();
+    arena->draw();
 
     glPushMatrix();
-    glTranslated(position->x, position->y, position->z);
+    glTranslated(cube_position->x, cube_position->y, cube_position->z);
     glMultMatrixd(rotation->to_matrix());
-    glScaled(100.0, 100.0, 100.0);
-
-    glColor3d(color::white.r, color::white.g, color::white.b);
-    glutWireCube(1.0);
+    glScaled(10.0, 10.0, 10.0);
+    set_material(material::purple);
+    draw_ship();
     glPopMatrix();
 
-    glPushMatrix();
-    glColor3d(color::purple.r, color::purple.g, color::purple.b);
-    glBegin(GL_LINES);
-    glVertex3d(position->x, position->y, position->z);
+//    glEnable(GL_TEXTURE_2D);
+//    glBindTexture(GL_TEXTURE_2D, moon_tex);
+//    glPushMatrix();
+//    glScaled(100.0, 100.0, 100.0);
+//    set_material(material::white);
+//    draw_sphere(1.0, 100, 100);
+//    glPopMatrix();
+//    glDisable(GL_TEXTURE_2D);
 
-    vector3d target = *position + *direction * 100.0;
+//    glEnable(GL_TEXTURE_2D);
+//    glBindTexture(GL_TEXTURE_2D, uv_grid_tex);
+//    glPushMatrix();
+//    glTranslated(100.0, 0.0, 0.0);
+//    glScaled(100.0, 100.0, 100.0);
+//    set_material(material::white);
+//    draw_ico(1.0, 5);
+//    glPopMatrix();
+//    glDisable(GL_TEXTURE_2D);
+
+//    glEnable(GL_TEXTURE_2D);
+//    glBindTexture(GL_TEXTURE_2D, uv_grid_tex);
+//    glPushMatrix();
+//    glTranslated(200.0, 0.0, 0.0);
+//    glScaled(100.0, 100.0, 100.0);
+//    set_material(material::purple);
+//    draw_ico(1.0, 1);
+//    glPopMatrix();
+//    glDisable(GL_TEXTURE_2D);
+//
+//
+//    glEnable(GL_TEXTURE_2D);
+//    glBindTexture(GL_TEXTURE_2D, uv_grid_tex);
+//    glPushMatrix();
+//    glTranslated(400.0, 0.0, 0.0);
+//    glScaled(100.0, 100.0, 100.0);
+//    set_material(material::purple);
+//    draw_ico(1.0, 2);
+//    glPopMatrix();
+//    glDisable(GL_TEXTURE_2D);
+//
+//
+//    glEnable(GL_TEXTURE_2D);
+//    glBindTexture(GL_TEXTURE_2D, uv_grid_tex);
+//    glPushMatrix();
+//    glTranslated(600.0, 0.0, 0.0);
+//    glScaled(100.0, 100.0, 100.0);
+//    set_material(material::purple);
+//    draw_ico(1.0, 3);
+//    glPopMatrix();
+//    glDisable(GL_TEXTURE_2D);
+//
+//    glEnable(GL_TEXTURE_2D);
+//    glBindTexture(GL_TEXTURE_2D, uv_grid_tex);
+//    glPushMatrix();
+//    glTranslated(800.0, 0.0, 0.0);
+//    glScaled(100.0, 100.0, 100.0);
+//    set_material(material::purple);
+//    draw_ico(1.0, 5);
+//    glPopMatrix();
+//    glDisable(GL_TEXTURE_2D);
+
+
+//    glEnable(GL_TEXTURE_2D);
+//    glBindTexture(GL_TEXTURE_2D, uv_grid_tex);
+//    glPushMatrix();
+//    set_material(material::white);
+//    glScaled(50.0, 50.0, 50.0);
+//    draw_sphere(1.0, 10, 10);
+//    glPopMatrix();
+//    glDisable(GL_TEXTURE_2D);
+
+//    glDisable(GL_TEXTURE_2D);
+//    glEnable(GL_TEXTURE_2D);
+//    glDisable(GL_LIGHTING);
+//    glBindTexture(GL_TEXTURE_2D, particle_tex);
+//
+//    glPushMatrix();
+//    glMultMatrixd(camera->orientation.to_matrix());
+//    glBegin(GL_QUADS);
+//    glTexCoord2d(0.0, 0.0);
+//    glVertex3d(-50.0, -50.0, 0.0);
+//    glTexCoord2d(1.0, 0.0);
+//    glVertex3d(50.0, -50.0, 0.0);
+//    glTexCoord2d(1.0, 1.0);
+//    glVertex3d(50.0, 50.0, 0.0);
+//    glTexCoord2d(0.0, 1.0);
+//    glVertex3d(-50.0, 50.0, 0.0);
+//    glEnd();
+//
+//    glPopMatrix();
+//    glEnable(GL_LIGHTING);
+//    glDisable(GL_TEXTURE_2D);
+
+    glPushMatrix();
+    set_material(material::white);
+    glBegin(GL_LINES);
+    glVertex3d(cube_position->x, cube_position->y, cube_position->z);
+    vector3d target = *cube_position + *cube_direction * 100.0;
     glVertex3d(target.x, target.y, target.z);
     glEnd();
     glPopMatrix();
@@ -166,17 +412,46 @@ void movement() {
         pitch(true, 1.0);
     if (input::key_states[S])
         pitch(false, 1.0);
-    if (input::key_states[D])
+    if (input::key_states[D]) {
         roll(true, 1.0);
-    if (input::key_states[A])
+        l_rot -= 0.5;
+    }
+    if (input::key_states[A]) {
         roll(false, 1.0);
+        r_rot += 0.5;
+    }
     if (input::key_states[SPACEBAR]) {
-        *position += *direction * velocity * g::d_time;
+        *cube_position += *cube_direction * velocity * g::d_time;
     }
 
-    pitch(input::y_delta < 0.0, abs(input::y_delta));
-    yaw(input::x_delta > 0.0, abs(input::x_delta));
-    camera->move(*position - *direction * 500.0);
+    if (input::key_states[X]) {
+        double angle = 180.0;
+        quaternion qr = quaternion(
+            cos(to_radians(angle * 0.5)), {
+                y_axis->x * sin(to_radians(angle * 0.5)),
+                y_axis->y * sin(to_radians(angle * 0.5)),
+                y_axis->z * sin(to_radians(angle * 0.5))
+            }
+        );
+
+        camera->rotate(*rotation * qr);
+        vector3d target = *cube_position + *cube_direction * 200.0;
+        vector3d up_offset = { 0, 1, 0 };
+        up_offset.rotate(camera->orientation);
+        camera->move(target + up_offset * 25.0);
+    } else {
+        camera->rotate(*rotation);
+        vector3d target = *cube_position - *cube_direction * 200.0;
+        vector3d up_offset = { 0, 1, 0 };
+        up_offset.rotate(camera->orientation);
+        camera->move(target + up_offset * 25.0);
+    }
+
+//    mouse_control = input::key_states[X];
+//    if (mouse_control) {
+//        pitch(input::y_delta < 0.0, abs(input::y_delta));
+//        yaw(input::x_delta > 0.0, abs(input::x_delta));
+//    }
 }
 
 void on_reshape(int width, int height) {
@@ -187,8 +462,6 @@ void on_reshape(int width, int height) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(FOV, g::width / g::height, Z_NEAR, Z_FAR);
-
-    camera->look_at({ORIGIN_X, ORIGIN_Y, ORIGIN_Z});
 
     error_check("game_init::on_reshape");
 }
@@ -201,7 +474,6 @@ void on_idle() {
 
     movement();
     camera->update();
-    camera->look_at(*position);
     glutPostRedisplay();
     error_check("game_init::on_idle");
 }
@@ -228,38 +500,75 @@ void on_mouse_motion(int x, int y) {
 }
 
 void init_camera() {
-    vector3d camera_position{0.0, 50.0, TOTAL_UNITS / 2.0};
+    vector3d camera_position{ 0.0, 50.0, TOTAL_UNITS / 2.0 };
     camera = make_shared<game_camera>(camera_position, quaternion::get_identity());
 }
 
+void load_texture(GLuint& textureHandle, const char* filename) {
+    int width, height, components;
+    unsigned char* data;
 
-void test_rotation() {
-    vector3d v{ 0.0, 1.0, 0.0 };
-    // vector3d axis_t{ 0.0, 0.0, 1.0 };
-    // v.rotate(90.0, axis_t);
+    stbi_set_flip_vertically_on_load(true);
+    data = stbi_load(filename, &width, &height, &components, STBI_rgb_alpha);
+    glPushAttrib(GL_TEXTURE_BIT);
+    glGenTextures(1, &textureHandle);
+    glBindTexture(GL_TEXTURE_2D, textureHandle);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    free(data);
+    glPopAttrib();
+}
 
-    v.rotate(quaternion::get_identity());
-    printf("rotated_v1: %.3f, %.3f, %.3f\n", v.x, v.y, v.z);
+void init_lighting() {
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+    glEnable(GL_LIGHTING);
 
-    double angle = 90.0;
-    quaternion qr = quaternion(
-        cos(to_radians(angle * 0.5)), {
-            x_axis->x * sin(to_radians(angle * 0.5)),
-            x_axis->y * sin(to_radians(angle * 0.5)),
-            x_axis->z * sin(to_radians(angle * 0.5))
-        }
-    );
+    glShadeModel(GL_SMOOTH);
 
-    quaternion q_result = quaternion::get_identity() * qr;
+//    GLfloat global_ambient_rgba[] = { 0.2, 0.2, 0.2, 1.0 };
+//    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient_rgba);
 
-    v.rotate(q_result);
-    printf("rotated_v2: %.3f, %.3f, %.3f\n", v.x, v.y, v.z);
-    printf("rotated_q: %.3f, %.3f, %.3f, %.3f\n", q_result.w, q_result.x, q_result.y, q_result.z);
+    GLfloat light0_position[4]{ -0.8, 0.8, -0.8, 0.0 };
+    set_light(GL_LIGHT0, material::light, light0_position);
+}
+
+void init_textures() {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_NORMALIZE);
+
+    load_texture(tex_front,
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\skybox\front.png)");
+    load_texture(tex_back,
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\skybox\back.png)");
+    load_texture(tex_top,
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\skybox\top.png)");
+    load_texture(tex_bottom,
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\skybox\bottom.png)");
+    load_texture(tex_left,
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\skybox\left.png)");
+    load_texture(tex_right,
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\skybox\right.png)");
+
+    load_texture(particle_tex,
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\fireball.png)");
+
+    load_texture(uv_grid_tex,
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\uv.png)");
+
+    load_texture(moon_tex,
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\moon.jpg)");
+
+    load_texture(ship_tex,
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\files\models\ship\ship.png)");
 }
 
 void init_game(int* argcp, char** argv, game_window* window) {
     glutInit(argcp, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
     glutInitWindowPosition(window->position_x, window->position_y);
     glutInitWindowSize(window->width, window->height);
 
@@ -285,8 +594,24 @@ void init_game(int* argcp, char** argv, game_window* window) {
     gluPerspective(FOV, g::width / g::height, Z_NEAR, Z_FAR);
 
     init_camera();
+    init_lighting();
+    init_textures();
 
-    test_rotation();
+    arena = make_shared<game_arena>(TOTAL_UNITS, TOTAL_UNITS, TOTAL_UNITS);
+    std::string a = argv[0];
+    a.append(R"(\..\..\files\models\ship\ship.obj)");
+
+    ship = load_obj(
+        a.c_str());
+
+    body = load_obj(
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\files\models\ship_hierarchical\body.obj)");
+    wing_left = load_obj(
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\files\models\ship_hierarchical\wing_left.obj)");
+    wing_right = load_obj(
+        R"(C:\Users\Quartzenstein\Desktop\Interactive 3D Graphics and Animation\Asteroid Arena 3D\files\models\ship_hierarchical\wing_right.obj)");
+
+    reg
 
     glutMainLoop();
 }

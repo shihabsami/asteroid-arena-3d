@@ -16,6 +16,7 @@ public:
     static size_t base_entity_id;
     static size_t base_component_id;
     static vector<shared_ptr<entity>> entities;
+    static shared_ptr<entity> player;
 
     inline data_manager() = default;
 

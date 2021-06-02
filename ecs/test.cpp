@@ -34,7 +34,7 @@ int main() {
         cout << c.first << " - " << c.second << endl;
 
     cout << entity->component_register.size() << endl;
-    cout << (data_manager::entity_has<c_test>(entity) ? "y" : "n") << endl;
+    cout << (data_manager::entity_has<c_test, c_test_alt>(entity) ? "y" : "n") << endl;
 
     entity->remove_component(1);
     for (const auto& c : entity->component_data)

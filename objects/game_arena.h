@@ -2,6 +2,8 @@
 #define GAME_ARENA_H
 
 #include "wall.h"
+#include "../utilities/mesh_component.h"
+#include "../utilities/lighting_component.h"
 
 #include <memory>
 
@@ -10,19 +12,21 @@ using std::unique_ptr;
 using std::make_unique;
 
 enum wall_orientation {
-    FRONT, BACK, UP, DOWN, LEFT, RIGHT
+    FRONT, BACK, TOP, BOTTOM, LEFT, RIGHT
 };
 
 class game_arena {
 public:
     game_arena(double width, double height, double length);
+
     void init_walls();
-    void draw();
+
+    void draw() const;
 
     const double width;
     const double height;
     const double length;
-    const array<unique_ptr<wall>, 6> walls;
+    array<unique_ptr<wall>, 6> walls;
 };
 
 #endif // !GAME_ARENA_H

@@ -2,10 +2,14 @@
 #define MATH_H
 
 #include <cmath>
+#include <limits>
+#include <random>
 
 #include "../utilities/lighting_component.h"
 
 using std::lerp;
+using std::random_device;
+using std::uniform_real_distribution;
 
 // this namespace contains definitions of static math functions used all throughout
 static double to_radians(double degrees) {
@@ -17,10 +21,11 @@ static double to_degrees(double radians) {
 }
 
 // generate double random numbers
-//static double get_random(double lower, double upper) {
-//    // TODO make use <random> engine and real distribution
-//    return lower + (rand() / (RAND_MAX / (upper - lower)));
-//}
+static double get_random(double lower, double upper) {
+    random_device engine;
+    uniform_real_distribution distribution(lower, upper);
+    return distribution(engine);
+}
 
 
 // linear interpolation for color_t values

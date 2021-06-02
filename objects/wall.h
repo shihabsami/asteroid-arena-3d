@@ -2,15 +2,17 @@
 #define WALL_H
 
 #include "../main/config.h"
-#include "../utilities/lighting_component.h"
+#include "../math/vector3d.h"
 #include "../utilities/mesh_component.h"
+#include "../utilities/lighting_component.h"
 
 class wall {
 public:
-    wall(mesh_t mesh, const material_t& material);
+    wall(const vector3d& position, vector<line_t>& lines, const material_t& material);
     void draw() const;
 
-    mesh_t mesh;
+    vector3d position;
+    vector<line_t> lines;
     material_t material;
 };
 

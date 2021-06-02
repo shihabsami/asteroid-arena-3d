@@ -7,20 +7,17 @@ using std::abs;
 quaternion::quaternion() = default;
 
 quaternion::quaternion(double w, const vector3d& v)
-    : w(w), x(v.x), y(v.y), z(v.z) {
-    n = get_norm();
-}
+    : w(w), x(v.x), y(v.y), z(v.z) {}
 
 quaternion::quaternion(double w, double x, double y, double z)
-    : w(w), x(x), y(y), z(z) {
-    n = get_norm();
-}
+    : w(w), x(x), y(y), z(z) {}
 
 quaternion::quaternion(const quaternion& q) = default;
 
 quaternion& quaternion::operator=(const quaternion& q) = default;
 
 void quaternion::normalise() {
+    double n = get_norm();
     w /= n;
     x /= n;
     y /= n;
@@ -61,7 +58,8 @@ quaternion quaternion::get_conjugate() const {
 }
 
 quaternion quaternion::get_inverse() const {
-    return get_conjugate() * (1 / n * n);
+    double n = get_norm();
+    return get_conjugate() * (n * n);
 }
 
 quaternion quaternion::slerp(const quaternion& start, const quaternion& end, double t) {

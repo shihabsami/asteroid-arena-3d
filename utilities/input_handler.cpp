@@ -44,6 +44,10 @@ void input_handler::on_key_down(unsigned char key, int x, int y)
     case 'E':
         input::key_states[E] = true;
         break;
+    case 'x':
+    case 'X':
+        input::key_states[X] = true;
+        break;
     case 32:
         input::key_states[SPACEBAR] = true;
         break;
@@ -81,6 +85,10 @@ void input_handler::on_key_up(unsigned char key, int x, int y)
     case 'e':
     case 'E':
         input::key_states[E] = false;
+        break;
+    case 'x':
+    case 'X':
+        input::key_states[X] = false;
         break;
     case 32:
         input::key_states[SPACEBAR] = false;

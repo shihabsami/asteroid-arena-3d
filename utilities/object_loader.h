@@ -42,15 +42,15 @@ static shared_ptr<mesh_t> load_obj(const char* file_name) {
         if (prefix == "v") {
             point3d position;
             ss >> position.x >> position.y >> position.z;
-            positions->push_back(move(position));
+            positions->push_back(position);
         } else if (prefix == "vt") {
             point2d tex_coord;
             ss >> tex_coord.x >> tex_coord.y;
-            texture_coords->push_back(move(tex_coord));
+            texture_coords->push_back(tex_coord);
         } else if (prefix == "vn") {
             point3d normal;
             ss >> normal.x >> normal.y >> normal.z;
-            normals->push_back(move(normal));
+            normals->push_back(normal);
         } else if (prefix == "f") {
             int position = 0;
             size_t index = 0;
@@ -73,21 +73,13 @@ static shared_ptr<mesh_t> load_obj(const char* file_name) {
         }
     }
 
-//    vector<vertex_t> model;
-//    model.resize(position_indices.size(), vertex_t{});
-//    for (size_t i = 0; i < model.size(); ++i) {
-//        model.at(i).position = positions.at(position_indices.at(i) - 1);
-//        model.at(i).texture_coord = texture_coords.at(texture_coord_indices.at(i) - 1);
-//        model.at(i).normal = normals.at(normal_indices.at(i) - 1);
-//    }
-
     shared_ptr<mesh_t> mesh = make_shared<mesh_t>();
     mesh->faces.resize(position_indices->size() / 3, face_t{});
 
     for (size_t i = 0, j = 0; i < position_indices->size(); i += 3, ++j) {
         for (size_t k = 0; k < 3; ++k) {
             mesh->faces.at(j).vertices.at(k).position = positions->at(position_indices->at(i + k) - 1);
-            mesh->faces.at(j).vertices.at(k).texture_coord = texture_coords->at(texture_coord_indices->at(i + k) - 1);
+            mesh->faces.at(j).vertices.at(k).texcoord = texture_coords->at(texture_coord_indices->at(i + k) - 1);
             mesh->faces.at(j).vertices.at(k).normal = normals->at(normal_indices->at(i + k) - 1);
         }
     }

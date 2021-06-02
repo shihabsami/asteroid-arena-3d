@@ -7,7 +7,8 @@
 class game_camera {
 public:
     game_camera(const vector3d& position, const quaternion& orientation);
-    void look_at(const vector3d& target) const;
+    void orient() const;
+    void translate() const;
     void move(const vector3d& v);
     void rotate(const quaternion& q);
     void update();

@@ -4,7 +4,7 @@
 namespace input
 {
     extern bool mouse_down;
-    extern bool key_states[8];
+    extern bool key_states[9];
     extern int mouse_x;
     extern int mouse_y;
     extern double x_delta;
@@ -13,7 +13,7 @@ namespace input
 
 enum key
 {
-    W, S, A, D, Q, E, SPACEBAR, ANY
+    W, S, A, D, Q, E, X, SPACEBAR, ANY
 };
 
 class input_handler
