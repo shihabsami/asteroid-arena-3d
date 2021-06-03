@@ -114,5 +114,5 @@ void game_arena::draw() const {
     glutWireCube(width);
     glPopMatrix();
 
-    error_check("game_arena::draw");
+    error_check("game_arena::display");
 }

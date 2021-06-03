@@ -19,5 +19,5 @@ void wall::draw() const {
     glEnd();
 
     glPopMatrix();
-    error_check("wall::draw");
+    error_check("wall::display");
 }

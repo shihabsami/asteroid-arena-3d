@@ -1,21 +1,13 @@
 #include "game_object.h"
 
-#include <utility>
-
-using std::move;
-
 game_object::game_object() = default;
 
 game_object::game_object(
-    shared_ptr<mesh_t>& mesh, shared_ptr<vector3d>& position, shared_ptr<quaternion>& rotation,
-    shared_ptr<vector3d>& scale, shared_ptr<vector3d>& direction, double velocity)
-    : mesh(move(mesh)), position(move(position)), rotation(move(rotation)),
-    scale(move(scale)), direction(move(direction)), velocity(velocity) {}
+    const shared_ptr<mesh_t>& mesh, const vector3d& position, const quaternion& rotation,
+    const vector3d& scale, const vector3d& direction, double velocity)
+    : mesh(mesh), position(position), rotation(rotation),
+    scale(scale), direction(direction), velocity(velocity) {}
 
 game_object::~game_object() {
     mesh.reset();
-    position.reset();
-    rotation.reset();
-    scale.reset();
-    direction.reset();
 }

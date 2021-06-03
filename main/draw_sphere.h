@@ -116,7 +116,6 @@ void draw_sphere(double radius, int sector_count, int stack_count) {
             // 2 triangles per sector excluding first and last stacks
             // k1 => k2 => k1+1
 
-
             if (i != 0) {
                 indices.push_back(k1);
                 indices.push_back(k2);
@@ -141,7 +140,6 @@ void draw_sphere(double radius, int sector_count, int stack_count) {
                     vertices.at(k2 + 1)
                 });
             }
-
 
             // store indices for lines
             // vertical lines for all stacks, k1 => k2

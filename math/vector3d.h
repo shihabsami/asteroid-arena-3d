@@ -43,8 +43,6 @@ public:
 
     static vector3d lerp(const vector3d& start, const vector3d& end, double t);
 
-    bool operator==(const vector3d& v) const;
-
     // operator overloads to do scalar operations
     vector3d operator+(const vector3d& v) const;
 
@@ -61,6 +59,12 @@ public:
     vector3d& operator*=(double s);
 
     vector3d& operator/=(double s);
+
+    static vector3d forward();
+
+    static vector3d right();
+
+    static vector3d up();
 
     double x;
     double y;

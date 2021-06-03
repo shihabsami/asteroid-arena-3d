@@ -134,8 +134,8 @@ vector3d& vector3d::operator/=(double s) {
     return *this;
 }
 
-bool vector3d::operator==(const vector3d& v) const {
+vector3d vector3d::forward() { return {0.0, 0.0, -1.0}; }
 
+vector3d vector3d::right() { return {1.0, 0.0, 0.0}; }
 
-    return v.x;
-}
+vector3d vector3d::up() { return {0.0, 1.0, 0.0}; }

@@ -1,26 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define GL_SILENCE_DEPRECATION
-
-#if _WIN32
-    #include <windows.h>
-    #define PATH_SEPARATOR "\\"
-#endif
-
-#if __APPLE__
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glu.h>
-    #include <GLUT/glut.h>
-    #define PATH_SEPARATOR "/"
-#else
-    #include <GL/gl.h>
-    #include <GL/glu.h>
-    #include <GL/glut.h>
-#endif
-
-#include <iostream>
-
 // initial configurations
 #define GAME_TITLE      "Asteroid Arena 3D"
 #define INIT_WIDTH      1280
@@ -33,35 +13,23 @@
 // constants used in transformations
 #define ORIGIN_X       0
 #define ORIGIN_Y       0
-#define ORIGIN_Z       0
 #define Z_NEAR         0.1
 #define Z_FAR          5 * TOTAL_UNITS + Z_NEAR
 #define FOV            45.0
 
-/*
- * arena width should ideally be within TOTAL_UNITS else it shall exceed
- * the coordinate system's maximum size and shall not be fully visible
- */
+#define CAMERA_LAG 5.0
+
 #define ARENA_WIDTH                1000.0
 #define ARENA_HEIGHT               1000.0
 #define ARENA_LENGTH               1000.0
 #define ARENA_WALL_WIDTH           1.0
-#define WALL_COLLISION_THRESHOLD   100
 
+#define SPACESHIP_SCALE 100.0
+#define SPACESHIP_VELOCITY 500.0
+#define SPACESHIP_ROTATION_DELTA 90.0
 
-
-#define CAMERA_LAG 5.0
-
-
-#define SPACESHIP_STEERING_MODIFIER 90.0 // delta angle per second
-
-
-// g namespace containing all g variables used
-namespace g {
-    extern double width;
-    extern double height;
-    extern double d_time;
-    extern double c_time;
-}
+#define ASTEROID_MIN_ROTATION 45.0
+#define ASTEROID_MAX_ROTATION 90.0
+#define ASTEROID_HP_MODIFIER 10
 
 #endif // !CONFIG_H

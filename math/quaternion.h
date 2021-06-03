@@ -11,7 +11,7 @@ class quaternion {
 public:
     quaternion();
 
-    quaternion(double w, const vector3d& v);
+    quaternion(double angle, const vector3d& axis);
 
     quaternion(double w, double x, double y, double z);
 
@@ -20,8 +20,6 @@ public:
     quaternion& operator=(const quaternion& q);
 
     void normalise();
-
-    static quaternion get_identity();
 
     [[nodiscard]] double get_norm() const;
 

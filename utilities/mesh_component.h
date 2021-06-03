@@ -45,6 +45,10 @@ public:
 
 class mesh_t {
 public:
+    mesh_t() = default;
+
+    mesh_t(const vector<face_t>& faces) : faces(faces) {}
+
     void render() const {
         glBegin(GL_TRIANGLES);
         for (const auto& face : faces) {

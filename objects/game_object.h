@@ -7,9 +7,7 @@
 
 #include <memory>
 
-using std::array;
 using std::shared_ptr;
-using std::make_shared;
 
 /**
  * An abstract class for game objects to inherit from
@@ -23,10 +21,10 @@ public:
 
     // construct game object with specified parameters
     game_object(
-        shared_ptr<mesh_t>& mesh, shared_ptr<vector3d>& position, shared_ptr<quaternion>& rotation,
-        shared_ptr<vector3d>& scale, shared_ptr<vector3d>& direction, double velocity);
+        const shared_ptr<mesh_t>& mesh, const vector3d& position, const quaternion& rotation,
+        const vector3d& scale, const vector3d& direction, double velocity);
 
-    ~game_object();
+    virtual ~game_object();
 
     // initialise the game object
     virtual void init() = 0;
@@ -34,22 +32,22 @@ public:
     // calculate the current position/direction of the game object
     virtual void movement() = 0;
 
-    // draw the game object
+    // display the game object
     virtual void draw() = 0;
 
     shared_ptr<mesh_t> mesh;
 
     // position of the game object
-    shared_ptr<vector3d> position;
+    vector3d position;
 
     // direction of the game object as an unit vector
-    shared_ptr<vector3d> direction;
+    vector3d direction;
 
     // scale of the game object
-    shared_ptr<vector3d> scale;
+    vector3d scale;
 
     // rotation of the game object as an unit quaternion
-    shared_ptr<quaternion> rotation;
+    quaternion rotation;
 
     // v of the game object in world coordinates
     double velocity{};

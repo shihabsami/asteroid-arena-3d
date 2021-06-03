@@ -1,13 +1,19 @@
 #include "quaternion.h"
+#include "game_math.h"
 
 #include <cmath>
 
 using std::abs;
 
-quaternion::quaternion() = default;
+quaternion::quaternion() : w(1.0), x(), y(), z() {}
 
-quaternion::quaternion(double w, const vector3d& v)
-    : w(w), x(v.x), y(v.y), z(v.z) {}
+quaternion::quaternion(double angle, const vector3d& axis) {
+    double angle_radians = to_radians(angle * 0.5);
+    w = cos(angle_radians);
+    x = axis.x * sin(angle_radians) / axis.m;
+    y = axis.y * sin(angle_radians) / axis.m;
+    z = axis.z * sin(angle_radians) / axis.m;
+}
 
 quaternion::quaternion(double w, double x, double y, double z)
     : w(w), x(x), y(y), z(z) {}
@@ -41,11 +47,10 @@ double* quaternion::to_matrix() const {
 
 quaternion quaternion::operator*(const quaternion& q) const {
     return {
-        w * q.w - x * q.x - y * q.y - z * q.z, {
+        w * q.w - x * q.x - y * q.y - z * q.z,
             w * q.x + x * q.w + y * q.z - z * q.y,
             w * q.y - x * q.z + y * q.w + z * q.x,
             w * q.z + x * q.y - y * q.x + z * q.w
-        }
     };
 }
 
@@ -108,8 +113,4 @@ quaternion quaternion::slerp(const quaternion& start, const quaternion& end, dou
     q.y = (start.y * ratioA + end_mod.y * ratioB);
     q.z = (start.z * ratioA + end_mod.z * ratioB);
     return q;
-}
-
-quaternion quaternion::get_identity() {
-    return {1.0, 0.0, 0.0, 0.0};
 }
