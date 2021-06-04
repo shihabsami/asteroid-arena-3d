@@ -8,12 +8,16 @@
 
 class wall {
 public:
-    wall(const vector3d& position, vector<line_t>& lines, const material_t& material);
+    wall(const vector3d& position, vector<line_t>& lines);
+    void current_material(const material_t& m);
+    void update();
     void draw() const;
 
+    double t{};
     vector3d position;
     vector<line_t> lines;
-    material_t material;
+    material_t old_material;
+    material_t new_material;
 };
 
 #endif // !WALL_H

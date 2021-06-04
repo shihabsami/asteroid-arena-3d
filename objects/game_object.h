@@ -32,7 +32,7 @@ public:
     // calculate the current position/direction of the game object
     virtual void movement() = 0;
 
-    // display the game object
+    // draw_objects the game object
     virtual void draw() = 0;
 
     shared_ptr<mesh_t> mesh;

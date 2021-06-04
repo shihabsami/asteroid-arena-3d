@@ -94,11 +94,19 @@ namespace material {
         76.8f
     };
 
-    const material_t wall_material{
+    const material_t wall_white{
         { 1.0f, 1.0f, 1.0f, 0.4f },
         { 1.0f, 1.0f, 1.0f, 0.4f },
         { 1.0f, 1.0f, 1.0f, 0.4f },
         { 0.0f, 0.0f, 0.0f, 0.4f },
+        0.0
+    };
+
+    const material_t wall_red {
+        { 1.0f, 0.0f, 0.0f, 1.0f },
+        { 1.0f, 0.0f, 0.0f, 1.0f },
+        { 1.0f, 0.0f, 0.0f, 1.0f },
+        { 0.0f, 0.0f, 0.0f, 1.0f },
         0.0
     };
 }

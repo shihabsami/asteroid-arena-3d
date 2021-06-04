@@ -1,5 +1,6 @@
 #include "asset_library.h"
 #include "texture_loader.h"
+#include "../math/game_math.h"
 
 unordered_map<string, GLuint> asset_library::textures;
 
@@ -36,9 +37,11 @@ void asset_library::load_textures() {
     load_texture(spaceship_id, (tex_dir_path + SPACESHIP_TEX_KEY).c_str());
     textures.insert({ SPACESHIP_TEX_KEY, spaceship_id });
 
-    GLuint asteroid_id;
-    load_texture(asteroid_id, (tex_dir_path + ASTEROID_TEX_KEY).c_str());
-    textures.insert({ ASTEROID_TEX_KEY, asteroid_id });
+    for (int i = 1; i <= ASTEROID_TEX_COUNT; ++i) {
+        GLuint asteroid_id;
+        load_texture(asteroid_id, (tex_dir_path + ASTEROID_TEX_KEY(i)).c_str());
+        textures.insert({ ASTEROID_TEX_KEY(i), asteroid_id });
+    }
 }
 
 void asset_library::load_models() {
@@ -55,25 +58,32 @@ void asset_library::load_models() {
 }
 
 shared_ptr<mesh_t> asset_library::sphere_model() {
-    vector<vertex_t> vertices;
-    vector<face_t> faces;
-
     double sector_step = 2 * M_PI / SPHERE_SECTORS;
     double stack_step = M_PI / SPHERE_STACKS;
     double sector_angle, stack_angle;
 
+    vector<vertex_t> vertices;
     for (int i = 0; i <= SPHERE_STACKS; ++i) {
         stack_angle = M_PI / 2 - i * stack_step;
         double xy = cos(stack_angle);
         double z = sin(stack_angle);
         for (int j = 0; j <= SPHERE_SECTORS; ++j) {
             sector_angle = j * sector_step;
-            point3d position{ xy * cos(sector_angle), xy * sin(sector_angle), z };
+            double x = xy * cos(sector_angle);
+            double y = xy * sin(sector_angle);
+
+            if (j > 0 && j < SPHERE_SECTORS && i > 0 && i < SPHERE_STACKS) {
+                x += get_random(-0.05, 0.05);
+                y += get_random(-0.05, 0.05);
+            }
+
+            point3d position{ x, y, z };
             point2d texcoord{ static_cast<double>(j) / SPHERE_SECTORS, static_cast<double>(i) / SPHERE_STACKS };
             vertices.emplace_back(position, texcoord, position);
         }
     }
 
+    vector<face_t> faces;
     for (int i = 0; i < SPHERE_STACKS; ++i) {
         int k1 = i * (SPHERE_SECTORS + 1);
         int k2 = k1 + SPHERE_SECTORS + 1;

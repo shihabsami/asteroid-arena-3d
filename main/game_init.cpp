@@ -1,157 +1,23 @@
 #include "game_init.h"
 #include "config.h"
-#include "../utilities/input_handler.h"
+#include "global.h"
 #include "../utilities/asset_library.h"
+#include "../utilities/game_manager.h"
+#include "../utilities/input_handler.h"
 #include "../utilities/object_register.h"
-#include "../utilities/lighting_component.h"
+#include "../utilities/collision_handler.h"
 
 double l_time;
-shared_ptr<object_register> registry;
-
-//GLuint tex_front;
-//GLuint tex_back;
-//GLuint tex_top;
-//GLuint tex_bottom;
-//GLuint tex_left;
-//GLuint tex_right;
-
-void draw_axes() {
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-
-    glLineWidth(4.0);
-    set_material(material::red);
-    glBegin(GL_LINES);
-    glVertex3d(-500.0, 0.0, 0.0);
-    glVertex3d(500.0, 0.0, 0.0);
-    glEnd();
-
-    set_material(material::green);
-    glBegin(GL_LINES);
-    glVertex3d(0.0, -500.0, 0.0);
-    glVertex3d(0.0, 500.0, 0.0);
-    glEnd();
-
-    set_material(material::blue);
-    glBegin(GL_LINES);
-    glVertex3d(0.0, 0.0, -500.0);
-    glVertex3d(0.0, 0.0, 500.0);
-    glEnd();
-
-    glPopMatrix();
-}
-
-//void draw_skybox() {
-//    glPushAttrib(GL_ENABLE_BIT);
-//    glEnable(GL_TEXTURE_2D);
-//    glDisable(GL_DEPTH_TEST);
-//    glDisable(GL_LIGHTING);
-//    glDisable(GL_BLEND);
-//
-//    glPushMatrix();
-//
-//    // front
-//    glBindTexture(GL_TEXTURE_2D, tex_front);
-//    glBegin(GL_QUADS);
-//    glTexCoord2d(0.0, 0.0);
-//    glVertex3d(-1.0, -1.0, -1.0);
-//    glTexCoord2d(1.0, 0.0);
-//    glVertex3d(1.0, -1.0, -1.0);
-//    glTexCoord2d(1.0, 1.0);
-//    glVertex3d(1.0, 1.0, -1.0);
-//    glTexCoord2d(0.0, 1.0);
-//    glVertex3d(-1.0, 1.0, -1.0);
-//    glEnd();
-//
-//    // back
-//    glBindTexture(GL_TEXTURE_2D, tex_back);
-//    glBegin(GL_QUADS);
-//    glTexCoord2d(0.0, 0.0);
-//    glVertex3d(1.0, -1.0, 1.0);
-//    glTexCoord2d(1.0, 0.0);
-//    glVertex3d(-1.0, -1.0, 1.0);
-//    glTexCoord2d(1.0, 1.0);
-//    glVertex3d(-1.0, 1.0, 1.0);
-//    glTexCoord2d(0.0, 1.0);
-//    glVertex3d(1.0, 1.0, 1.0);
-//    glEnd();
-//
-//    // top
-//    glBindTexture(GL_TEXTURE_2D, tex_top);
-//    glBegin(GL_QUADS);
-//    glTexCoord2d(0.0, 0.0);
-//    glVertex3d(-1.0, 1.0, -1.0);
-//    glTexCoord2d(1.0, 0.0);
-//    glVertex3d(1.0, 1.0, -1.0);
-//    glTexCoord2d(1.0, 1.0);
-//    glVertex3d(1.0, 1.0, 1.0);
-//    glTexCoord2d(0.0, 1.0);
-//    glVertex3d(-1.0, 1.0, 1.0);
-//    glEnd();
-//
-//    // bottom
-//    glBindTexture(GL_TEXTURE_2D, tex_bottom);
-//    glBegin(GL_QUADS);
-//    glTexCoord2d(0.0, 0.0);
-//    glVertex3d(-1.0, -1.0, 1.0);
-//    glTexCoord2d(1.0, 0.0);
-//    glVertex3d(1.0, -1.0, 1.0);
-//    glTexCoord2d(1.0, 1.0);
-//    glVertex3d(1.0, -1.0, -1.0);
-//    glTexCoord2d(0.0, 1.0);
-//    glVertex3d(-1.0, -1.0, -1.0);
-//    glEnd();
-//
-//    // left
-//    glBindTexture(GL_TEXTURE_2D, tex_left);
-//    glBegin(GL_QUADS);
-//    glTexCoord2d(0.0, 0.0);
-//    glVertex3d(-1.0, -1.0, 1.0);
-//    glTexCoord2d(1.0, 0.0);
-//    glVertex3d(-1.0, -1.0, -1.0);
-//    glTexCoord2d(1.0, 1.0);
-//    glVertex3d(-1.0, 1.0, -1.0);
-//    glTexCoord2d(0.0, 1.0);
-//    glVertex3d(-1.0, 1.0, 1.0);
-//    glEnd();
-//
-//    // right
-//    glBindTexture(GL_TEXTURE_2D, tex_right);
-//    glBegin(GL_QUADS);
-//    glTexCoord2d(0.0, 0.0);
-//    glVertex3d(1.0, -1.0, -1.0);
-//    glTexCoord2d(1.0, 0.0);
-//    glVertex3d(1.0, -1.0, 1.0);
-//    glTexCoord2d(1.0, 1.0);
-//    glVertex3d(1.0, 1.0, 1.0);
-//    glTexCoord2d(0.0, 1.0);
-//    glVertex3d(1.0, 1.0, -1.0);
-//    glEnd();
-//
-//    glPopMatrix();
-//
-//    glEnable(GL_BLEND);
-//    glEnable(GL_LIGHTING);
-//    glEnable(GL_DEPTH_TEST);
-//    glDisable(GL_TEXTURE_2D);
-//    glPopAttrib();
-//}
+shared_ptr<game_manager> manager;
 
 void on_display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
-    glClearColor
-        (
-            static_cast<GLclampf>(color::black.r),
-            static_cast<GLclampf>(color::black.g),
-            static_cast<GLclampf>(color::black.b), 1.0
-        );
+    glClearColor(0.0, 0.0, 0.0, 1.0);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    registry->display();
-    draw_axes();
+    manager->display();
 
     glutSwapBuffers();
     error_check("game_init::on_display");
@@ -174,8 +40,8 @@ void on_idle() {
     global::c_time = static_cast<double>(glutGet(GLUT_ELAPSED_TIME));
     global::d_time = (global::c_time - l_time) / 1000;
     l_time = global::c_time;
+    manager->update();
 
-    registry->update();
     glutPostRedisplay();
     error_check("game_init::on_idle");
 }
@@ -243,11 +109,11 @@ void init_game(int* argcp, char** argv, game_window* window) {
     asset_library::load_textures();
     asset_library::load_models();
 
-    registry = make_shared<object_register>();
-    registry->add_asteroid();
-    registry->add_asteroid();
-    registry->add_asteroid();
-    registry->add_asteroid();
+    manager = make_shared<game_manager>();
+    manager->o_register = make_shared<object_register>();
+    manager->c_handler = make_shared<collision_handler>(manager);
+
+    manager->start_game();
 
     glutMainLoop();
 }

@@ -10,7 +10,7 @@ public:
         const vector3d& position, const quaternion& rotation, const vector3d& scale,
         const vector3d& direction, double velocity);
 
-    ~spaceship();
+    ~spaceship() override;
 
     void init() override;
 
@@ -26,6 +26,8 @@ public:
 
     shared_ptr<mesh_t> l_wing;
     shared_ptr<mesh_t> r_wing;
+    quaternion l_wing_rotation;
+    quaternion r_wing_rotation;
     double t{};
     bool is_moving{};
 };

@@ -1,11 +1,7 @@
 #ifndef QUATERNION_H
 #define QUATERNION_H
 
-#include "vector3d.h"
-
-#include <array>
-
-using std::array;
+class vector3d;
 
 class quaternion {
 public:
@@ -19,7 +15,7 @@ public:
 
     quaternion& operator=(const quaternion& q);
 
-    void normalise();
+    [[maybe_unused]] void normalise();
 
     [[nodiscard]] double get_norm() const;
 

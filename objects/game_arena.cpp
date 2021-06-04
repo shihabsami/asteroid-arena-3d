@@ -1,6 +1,6 @@
 #include "game_arena.h"
 
-#define WALL_DIVISIONS 50
+#define WALL_DIVISIONS 250
 
 game_arena::game_arena(double width, double height, double length)
     : width(2 * width), height(2 * height), length(2 * length) {
@@ -44,9 +44,9 @@ void game_arena::init_walls() {
     }
 
     walls[FRONT] = make_unique<wall>(
-        vector3d(0.0, 0.0, z_max), nz_lines, material::wall_material);
+        vector3d(0.0, 0.0, z_max), nz_lines);
     walls[BACK] = make_unique<wall>(
-        vector3d(0.0, 0.0, z_min), pz_lines, material::wall_material);
+        vector3d(0.0, 0.0, z_min), pz_lines);
 
     vector<line_t> py_lines;
     vector<line_t> ny_lines;
@@ -72,9 +72,9 @@ void game_arena::init_walls() {
     }
 
     walls[TOP] = make_unique<wall>(
-        vector3d(0.0, y_max, 0.0), py_lines, material::wall_material);
+        vector3d(0.0, y_max, 0.0), py_lines);
     walls[BOTTOM] = make_unique<wall>(
-        vector3d(0.0, y_min, 0.0), ny_lines, material::wall_material);
+        vector3d(0.0, y_min, 0.0), ny_lines);
 
     vector<line_t> px_lines;
     vector<line_t> nx_lines;
@@ -100,19 +100,25 @@ void game_arena::init_walls() {
     }
 
     walls[LEFT] = make_unique<wall>(
-        vector3d(x_min, 0.0, 0.0), nx_lines, material::wall_material);
+        vector3d(x_min, 0.0, 0.0), nx_lines);
     walls[RIGHT] = make_unique<wall>(
-        vector3d(x_max, 0.0, 0.0), px_lines, material::wall_material);
+        vector3d(x_max, 0.0, 0.0), px_lines);
 }
 
 void game_arena::draw() const {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-    for (const auto& wall : walls)
-        if (wall) wall->draw();
-
+    set_material(material::wall_white);
     glutWireCube(width);
+
+    for (const auto& wall : walls) {
+        if (wall != nullptr) {
+            wall->update();
+            wall->draw();
+        }
+    }
+
     glPopMatrix();
 
-    error_check("game_arena::display");
+    error_check("game_arena::draw");
 }

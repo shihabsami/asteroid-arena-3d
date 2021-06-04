@@ -19,9 +19,8 @@
 #define SPACESHIP_L_WING_MODEL_KEY "spaceship_l_wing.obj"
 #define SPACESHIP_R_WING_MODEL_KEY "spaceship_r_wing.obj"
 
-// #define ASTEROID_TEX_KEY(i) "asteroid_" i ".png"
-
-#define ASTEROID_TEX_KEY "asteroid.jpg"
+#define ASTEROID_TEX_KEY(i) ("asteroid_" #i ".jpg")
+#define ASTEROID_TEX_COUNT 6
 #define ASTEROID_MODEL_KEY "asteroid"
 
 #define SPHERE_SECTORS  50

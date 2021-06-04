@@ -5,3 +5,4 @@
 - Only a few classes have been brought back from the 2D game.
 - Only draws axes now.
 - Mostly for configuring and understanding perspective and game_camera functionality.
+- https://www.solarsystemscope.com/textures/

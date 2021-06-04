@@ -3,13 +3,13 @@
 #include "../main/global.h"
 
 void asteroid::init() {
-    radius = sqrt(scale.x * scale.x + scale.y * scale.y + scale.z * scale.z);
+    radius = sqrt(scale.x / 2 * scale.x / 2 + scale.y / 2 * scale.y / 2 + scale.z / 2 * scale.z / 2);
     d_angle = get_random(ASTEROID_MIN_ROTATION, ASTEROID_MAX_ROTATION);
-//    rotation_axis = {
-//        get_random(0.0, 1.0),
-//        get_random(0.0, 1.0),
-//        get_random(0.0, 1.0)
-//    };
+    rotation_axis = {
+        get_random(0.0, 1.0),
+        get_random(0.0, 1.0),
+        get_random(0.0, 1.0)
+    };
 
     hp = static_cast<int>(radius / ASTEROID_HP_MODIFIER) + 1;
     hit_count = 0;
@@ -18,9 +18,8 @@ void asteroid::init() {
 }
 
 void asteroid::movement() {
-    rotation = rotation * quaternion{ d_angle * global::d_time, vector3d::right() };
-    direction = vector3d::forward().get_rotated(rotation);
-//    position = position + (direction * velocity * global::d_time);
+    rotation = rotation * quaternion{ d_angle * global::d_time, rotation_axis };
+    position = position + (direction * velocity * global::d_time);
 }
 
 void asteroid::draw() {
