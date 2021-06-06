@@ -3,6 +3,7 @@
 #include "../main/global.h"
 #include "../utilities/object_register.h"
 #include "../utilities/collision_handler.h"
+#include "../utilities/particle_system.h"
 
 game_manager::game_manager() {
     start_time = 0.0;
@@ -26,22 +27,23 @@ void game_manager::start_game() {
     game_running = true;
     game_over = false;
 
-    o_register->init_arena();
-    o_register->init_spaceship();
+    o_register->is_ready = true;
 }
 
 void game_manager::end_game() {
     game_running = false;
     game_over = true;
 
-    o_register->delete_arena();
-    o_register->delete_spaceship();
-    o_register->delete_objects();
+    o_register->is_ready = false;
+    o_register->reset();
+
+    start_game();
 }
 
 void game_manager::display() {
     c_handler->run();
-    o_register->draw_objects();
+    o_register->draw();
+    p_system->draw_particles();
 
     if (game_running) {
         if (global::c_time - l_wave_time >= WAVE_INTERVAL) {
@@ -57,9 +59,9 @@ void game_manager::display() {
         }
     }
 
-    error_check("game_manager::draw_objects");
+    error_check("game_manager::draw");
 }
 
 void game_manager::update() {
-    o_register->update_objects();
+    o_register->update();
 }

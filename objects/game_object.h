@@ -21,7 +21,7 @@ public:
 
     // construct game object with specified parameters
     game_object(
-        const shared_ptr<mesh_t>& mesh, const vector3d& position, const quaternion& rotation,
+        const shared_ptr<mesh_t>& mesh, GLuint texture_id, const vector3d& position, const quaternion& rotation,
         const vector3d& scale, const vector3d& direction, double velocity);
 
     virtual ~game_object();
@@ -32,10 +32,14 @@ public:
     // calculate the current position/direction of the game object
     virtual void movement() = 0;
 
-    // draw_objects the game object
+    // draw the game object
     virtual void draw() = 0;
 
+    // the mesh for the game object as a collection of faces
     shared_ptr<mesh_t> mesh;
+
+    // a texture handle for the game object generated beforehand
+    GLuint texture_id{};
 
     // position of the game object
     vector3d position;

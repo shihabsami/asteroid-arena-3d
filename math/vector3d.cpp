@@ -50,10 +50,7 @@ vector3d vector3d::cross(const vector3d& v) const {
 }
 
 vector3d vector3d::get_rotated(double angle, const vector3d& axis) const {
-    quaternion p{ 0.0, *this };
-    quaternion q{ cos(to_radians(angle * 0.5)), axis * sin(to_radians(angle * 0.5)) };
-    quaternion rotated = q * p * q.get_inverse();
-    return { rotated.x, rotated.y, rotated.z };
+    return get_rotated({ angle, axis });
 }
 
 vector3d vector3d::get_rotated(const quaternion& q) const {
@@ -134,8 +131,8 @@ vector3d& vector3d::operator/=(double s) {
     return *this;
 }
 
-vector3d vector3d::forward() { return {0.0, 0.0, -1.0}; }
+vector3d vector3d::forward() { return { 0.0, 0.0, -1.0 }; }
 
-vector3d vector3d::right() { return {1.0, 0.0, 0.0}; }
+vector3d vector3d::right() { return { 1.0, 0.0, 0.0 }; }
 
-vector3d vector3d::up() { return {0.0, 1.0, 0.0}; }
+vector3d vector3d::up() { return { 0.0, 1.0, 0.0 }; }

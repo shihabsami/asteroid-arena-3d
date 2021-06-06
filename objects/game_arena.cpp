@@ -1,6 +1,5 @@
 #include "game_arena.h"
-
-#define WALL_DIVISIONS 250
+#include "../main/config.h"
 
 game_arena::game_arena(double width, double height, double length)
     : width(2 * width), height(2 * height), length(2 * length) {
@@ -15,16 +14,16 @@ void game_arena::init_walls() {
     double z_min = length / 2;
     double z_max = -length / 2;
 
-    double x_step = width / WALL_DIVISIONS;
-    double y_step = height / WALL_DIVISIONS;
-    double z_step = length / WALL_DIVISIONS;
+    double x_step = width / ARENA_WALL_DIVISIONS;
+    double y_step = height / ARENA_WALL_DIVISIONS;
+    double z_step = length / ARENA_WALL_DIVISIONS;
     double x_start, y_start, z_start;
 
     vector<line_t> pz_lines;
     vector<line_t> nz_lines;
     x_start = x_min;
     y_start = y_min;
-    for (size_t i = 0; i < WALL_DIVISIONS - 1; ++i) {
+    for (size_t i = 0; i < ARENA_WALL_DIVISIONS - 1; ++i) {
         x_start += x_step;
         y_start += y_step;
 
@@ -52,7 +51,7 @@ void game_arena::init_walls() {
     vector<line_t> ny_lines;
     x_start = x_min;
     z_start = z_max;
-    for (size_t i = 0; i < WALL_DIVISIONS - 1; ++i) {
+    for (size_t i = 0; i < ARENA_WALL_DIVISIONS - 1; ++i) {
         x_start += x_step;
         z_start += z_step;
 
@@ -80,7 +79,7 @@ void game_arena::init_walls() {
     vector<line_t> nx_lines;
     y_start = y_min;
     z_start = z_max;
-    for (size_t i = 0; i < WALL_DIVISIONS - 1; ++i) {
+    for (size_t i = 0; i < ARENA_WALL_DIVISIONS - 1; ++i) {
         y_start += y_step;
         z_start += z_step;
 
@@ -120,5 +119,5 @@ void game_arena::draw() const {
 
     glPopMatrix();
 
-    error_check("game_arena::draw");
+    error_check("game_arena::draw_particles");
 }

@@ -21,12 +21,9 @@ quaternion::quaternion(const quaternion& q) = default;
 
 quaternion& quaternion::operator=(const quaternion& q) = default;
 
-[[maybe_unused]] void quaternion::normalise() {
+quaternion quaternion::get_normalised() const {
     double n = get_norm();
-    w /= n;
-    x /= n;
-    y /= n;
-    z /= n;
+    return { w / n, x / n, y / n, z / n };
 }
 
 double quaternion::get_norm() const {
@@ -47,9 +44,9 @@ double* quaternion::to_matrix() const {
 quaternion quaternion::operator*(const quaternion& q) const {
     return {
         w * q.w - x * q.x - y * q.y - z * q.z,
-            w * q.x + x * q.w + y * q.z - z * q.y,
-            w * q.y - x * q.z + y * q.w + z * q.x,
-            w * q.z + x * q.y - y * q.x + z * q.w
+        w * q.x + x * q.w + y * q.z - z * q.y,
+        w * q.y - x * q.z + y * q.w + z * q.x,
+        w * q.z + x * q.y - y * q.x + z * q.w
     };
 }
 
@@ -69,7 +66,7 @@ quaternion quaternion::get_inverse() const {
 quaternion quaternion::slerp(const quaternion& start, const quaternion& end, double t) {
     quaternion q{};
     double cos_half_theta = start.w * end.w + start.x * end.x + start.y * end.y + start.z * end.z;
-    if (abs(cos_half_theta) >= 1.0){
+    if (abs(cos_half_theta) >= 1.0) {
         q.w = start.w;
         q.x = start.x;
         q.y = start.y;
