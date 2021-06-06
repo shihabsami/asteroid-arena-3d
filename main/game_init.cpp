@@ -85,6 +85,7 @@ void init_game(int* argcp, char** argv, game_window* window) {
     glutIdleFunc(on_idle);
 
     glutMouseFunc(on_mouse_click);
+    glutMotionFunc(on_mouse_motion);
     glutPassiveMotionFunc(on_mouse_motion);
     glutIgnoreKeyRepeat(false);
     glutKeyboardFunc(on_key_down);

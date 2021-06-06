@@ -42,11 +42,9 @@ void spaceship::movement() {
     if (input::key_states[SPACEBAR]) {
         t = (t < 1.0) ? t + SPACESHIP_SPEED_UP_RATE * global::d_time : t;
         t = t > 1.0 ? 1.0 : t;
-        test = true;
     } else {
         t = (t > 0.0) ? t - SPACESHIP_SPEED_UP_RATE * global::d_time : t;
         t = t < 0.0 ? 0.0 : t;
-        test = false;
     }
 
     pitch(input::y_delta);
@@ -91,9 +89,8 @@ void spaceship::draw() {
 
     vector3d up_offset = position - direction * radius;
     GLfloat light_position[4] {
-        (GLfloat) up_offset.x, (GLfloat) up_offset.y, (GLfloat) up_offset.z, 1.0f};
-    if (test)
-        set_light(point_light, lerp(material::black, material::point_light, t), light_position);
+    (GLfloat) up_offset.x, (GLfloat) up_offset.y, (GLfloat) up_offset.z, 1.0f};
+    set_light(point_light, lerp(material::black, material::point_light, t), light_position);
 
     glTranslated(position.x, position.y, position.z);
     glMultMatrixd(rotation.to_matrix());

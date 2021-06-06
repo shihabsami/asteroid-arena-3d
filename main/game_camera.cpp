@@ -38,16 +38,16 @@ void game_camera::move(const vector3d& v) {
 void game_camera::rotate(const quaternion& q) {
     t = 0.0;
     if (input::key_states[Z]) {
-        orientation = target_orientation;
         target_orientation = quaternion{q * quaternion{90.0, vector3d::up()}}.get_normalised();
+        orientation = target_orientation;
         is_switched = true;
     } else if (input::key_states[C]) {
-        orientation = target_orientation;
         target_orientation = quaternion{q * quaternion{-90.0, vector3d::up()}}.get_normalised();
+        orientation = target_orientation;
         is_switched = true;
     } else if (input::key_states[X]) {
-        orientation = target_orientation;
         target_orientation = quaternion{q * quaternion{180.0, vector3d::up()}}.get_normalised();
+        orientation = target_orientation;
         is_switched = true;
     } else {
         target_orientation = q;

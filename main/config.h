@@ -17,7 +17,7 @@
 #define Z_FAR          5 * TOTAL_UNITS + Z_NEAR
 #define FOV            45.0
 
-#define CAMERA_LAG        5.0
+#define CAMERA_LAG        2.5
 #define CAMERA_Y_OFFSET   200.0
 #define CAMERA_Z_OFFSET   600.0
 
@@ -40,7 +40,7 @@
 #define ASTEROID_MAX_SCALE      90.0
 #define ASTEROID_MIN_VELOCITY   250.0
 #define ASTEROID_MAX_VELOCITY   500.0
-#define ASTEROID_HP_MODIFIER    25.0
+#define ASTEROID_HP_MODIFIER    45.0
 
 #define WAVE_INTERVAL              1000
 #define MAX_ASTEROID_COUNT         20

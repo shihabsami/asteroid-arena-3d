@@ -29,8 +29,6 @@ public:
     shared_ptr<mesh_t> r_wing;
     quaternion l_wing_rotation;
     quaternion r_wing_rotation;
-
-    bool test{};
     double t{};
 };
 
