@@ -2,6 +2,8 @@
 #include "texture_loader.h"
 #include "../math/game_math.h"
 
+using std::to_string;
+
 unordered_map<string, GLuint> asset_library::textures;
 
 unordered_map<string, shared_ptr<mesh_t>> asset_library::models;
@@ -39,22 +41,40 @@ void asset_library::load_textures() {
 
     for (int i = 1; i <= ASTEROID_TEX_COUNT; ++i) {
         GLuint asteroid_id;
-        load_texture(asteroid_id, (tex_dir_path + ASTEROID_TEX_KEY(i)).c_str());
-        textures.insert({ ASTEROID_TEX_KEY(i), asteroid_id });
+        load_texture(asteroid_id, (tex_dir_path + asteroid_tex_key(i)).c_str());
+        textures.insert({ asteroid_tex_key(i), asteroid_id });
     }
+
+    GLuint bullet_id;
+    load_texture(bullet_id, (tex_dir_path + BULLET_TEX_KEY).c_str());
+    textures.insert({ BULLET_TEX_KEY, bullet_id });
+
+    GLuint explosion_id;
+    load_texture(explosion_id, (tex_dir_path + EXPLOSION_TEX_KEY).c_str());
+    textures.insert({ EXPLOSION_TEX_KEY, explosion_id });
 }
 
 void asset_library::load_models() {
     string model_dir_path(MODEL_DIR_PATH);
+    shared_ptr<mesh_t> spaceship_body = load_obj((model_dir_path + SPACESHIP_BODY_MODEL_KEY).c_str());
+    spaceship_body->material = material::spaceship_body;
+    models.insert({ SPACESHIP_BODY_MODEL_KEY, spaceship_body });
 
-    models.insert({ SPACESHIP_BODY_MODEL_KEY,
-        load_obj((model_dir_path + SPACESHIP_BODY_MODEL_KEY).c_str()) });
-    models.insert({ SPACESHIP_L_WING_MODEL_KEY,
-        load_obj((model_dir_path + SPACESHIP_L_WING_MODEL_KEY).c_str()) });
-    models.insert({ SPACESHIP_R_WING_MODEL_KEY,
-        load_obj((model_dir_path + SPACESHIP_R_WING_MODEL_KEY).c_str()) });
+    shared_ptr<mesh_t> spaceship_l_wing = load_obj((model_dir_path + SPACESHIP_L_WING_MODEL_KEY).c_str());
+    spaceship_l_wing->material = material::spaceship_wing;
+    models.insert({ SPACESHIP_L_WING_MODEL_KEY, spaceship_l_wing });
 
-    models.insert({ ASTEROID_MODEL_KEY, sphere_model() });
+    shared_ptr<mesh_t> spaceship_r_wing = load_obj((model_dir_path + SPACESHIP_R_WING_MODEL_KEY).c_str());
+    spaceship_r_wing->material = material::spaceship_wing;
+    models.insert({ SPACESHIP_R_WING_MODEL_KEY, spaceship_r_wing });
+
+    shared_ptr<mesh_t> asteroid = sphere_model();
+    asteroid->material = material::asteroid;
+    models.insert({ ASTEROID_MODEL_KEY, asteroid });
+
+    shared_ptr<mesh_t> particle = quad_model();
+    particle->material = material::particle;
+    models.insert({ PARTICLE_MODEL_KEY, particle });
 }
 
 shared_ptr<mesh_t> asset_library::sphere_model() {
@@ -106,6 +126,23 @@ shared_ptr<mesh_t> asset_library::sphere_model() {
             }
         }
     }
+
+    return make_shared<mesh_t>(faces);
+}
+
+string asset_library::asteroid_tex_key(int index) {
+    return "asteroid_" + to_string(index) + ".jpg";
+}
+
+shared_ptr<mesh_t> asset_library::quad_model() {
+    vertex_t v0 = {{ -1.0, -1.0, -1.0 }, {0.0, 0.0}, {0.0, 1.0, 0.0}};
+    vertex_t v1 = {{ 1.0, -1.0, -1.0 }, { 1.0, 0.0 }, {0.0, 1.0, 0.0}};
+    vertex_t v2 = {{ 1.0, 1.0, -1.0 }, { 1.0, 1.0 }, {0.0, 1.0, 0.0}};
+    vertex_t v3 = {{ -1.0, 1.0, -1.0 }, { 0.0, 1.0 }, {0.0, 1.0, 0.0}};
+
+    vector<face_t> faces;
+    faces.emplace_back(array<vertex_t, 3>{v0, v1, v2});
+    faces.emplace_back(array<vertex_t, 3>{v0, v2, v3});
 
     return make_shared<mesh_t>(faces);
 }

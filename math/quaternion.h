@@ -15,7 +15,7 @@ public:
 
     quaternion& operator=(const quaternion& q);
 
-    [[maybe_unused]] void normalise();
+    quaternion get_normalised() const;
 
     [[nodiscard]] double get_norm() const;
 

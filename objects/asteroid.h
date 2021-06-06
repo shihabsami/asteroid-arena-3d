@@ -19,7 +19,6 @@ public:
     int hp;
     int hit_count;
     bool can_bounce;
-    bool can_split;
     double d_angle;
     vector3d rotation_axis;
 };

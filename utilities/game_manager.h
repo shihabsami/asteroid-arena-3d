@@ -3,6 +3,7 @@
 
 class object_register;
 class collision_handler;
+class particle_system;
 
 #include <memory>
 
@@ -32,6 +33,7 @@ public:
 
     shared_ptr<object_register> o_register;
     shared_ptr<collision_handler> c_handler;
+    shared_ptr<particle_system> p_system;
 };
 
 #endif // !GAME_MANAGER_H

@@ -9,8 +9,7 @@ wall::wall(const vector3d& position, vector<line_t>& lines)
     old_material(material::wall_white), new_material(material::wall_white) {}
 
 void wall::current_material(const material_t& m) {
-    // TODO lerp based on distance, fix double number comparison bullshit
-    if (m.ambient[3] != new_material.ambient[3]) {
+    if (m.shininess != new_material.shininess) {
         t = 0.0;
         old_material = new_material;
         new_material = m;
@@ -36,5 +35,6 @@ void wall::draw() const {
     glEnd();
 
     glPopMatrix();
-    error_check("wall::draw_objects");
+
+    error_check("wall::draw");
 }

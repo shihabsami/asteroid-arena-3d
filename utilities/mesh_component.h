@@ -1,9 +1,7 @@
 #ifndef MESH_COMPONENT_H
 #define MESH_COMPONENT_H
 
-#include "../math/point2d.h"
-#include "../math/point3d.h"
-#include "../main/graphics.h"
+#include "lighting_component.h"
 
 #include <array>
 #include <vector>
@@ -50,6 +48,7 @@ public:
     mesh_t(const vector<face_t>& faces) : faces(faces) {}
 
     void render() const {
+        set_material(material);
         glBegin(GL_TRIANGLES);
         for (const auto& face : faces) {
             for (const auto& vertex : face.vertices) {
@@ -62,6 +61,7 @@ public:
     }
 
     vector<face_t> faces;
+    material_t material{};
 };
 
 

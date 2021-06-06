@@ -7,6 +7,7 @@
 #include "../objects/game_arena.h"
 #include "../objects/spaceship.h"
 #include "../objects/asteroid.h"
+#include "../utilities/particle_system.h"
 
 #include <vector>
 #include <memory>
@@ -21,23 +22,19 @@ public:
 
     ~object_register();
 
-    [[nodiscard]] bool ready() const;
-
     void init_camera();
-
-    void delete_camera();
 
     void init_arena();
 
-    void delete_arena();
-
     void init_spaceship();
-
-    void delete_spaceship();
 
     void add_asteroid();
 
-    void delete_asteroid(int index);
+    void delete_asteroid(size_t index);
+
+    void add_bullet();
+
+    void delete_bullet(size_t index);
 
     vector3d next_launch_position();
 
@@ -45,19 +42,23 @@ public:
 
     static void draw_skybox();
 
-    void update_objects();
+    void draw();
 
-    void draw_objects();
+    void update();
 
-    void delete_objects();
+    void reset();
 
-    GLenum global_light;
-    GLfloat* global_light_position;
+    GLenum directional_light;
+    GLfloat* directional_light_position;
+    double l_fire_time{};
+    bool is_ready{};
+
     shared_ptr<game_camera> camera;
     shared_ptr<game_arena> arena;
     shared_ptr<spaceship> ship;
     vector<shared_ptr<asteroid>> asteroids;
     vector<vector3d> launch_positions;
+    shared_ptr<particle_system> p_system;
 };
 
 #endif // !OBJECT_REGISTER_H

@@ -14,7 +14,6 @@ void asteroid::init() {
     hp = static_cast<int>(radius / ASTEROID_HP_MODIFIER) + 1;
     hit_count = 0;
     can_bounce = false;
-    can_split = true;
 }
 
 void asteroid::movement() {
@@ -23,12 +22,18 @@ void asteroid::movement() {
 }
 
 void asteroid::draw() {
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
+
     glTranslated(position.x, position.y, position.z);
     glMultMatrixd(rotation.to_matrix());
     glScaled(scale.x, scale.y, scale.z);
     mesh->render();
+
     glPopMatrix();
-    error_check("asteroid::draw");
+    glDisable(GL_TEXTURE_2D);
+
+    error_check("asteroid::draw_particles");
 }

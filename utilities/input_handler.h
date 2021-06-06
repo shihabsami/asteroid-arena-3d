@@ -1,23 +1,22 @@
 #ifndef INPUT_HANDLER_H
 #define INPUT_HANDLER_H
 
-namespace input
-{
-    extern bool mouse_down;
-    extern bool key_states[9];
-    extern int mouse_x;
-    extern int mouse_y;
+namespace input {
+    extern bool mouse_states[3];
+    extern bool key_states[10];
     extern double x_delta;
     extern double y_delta;
 }
 
-enum key
-{
-    W, S, A, D, Q, E, X, SPACEBAR, ANY
+enum mouse {
+    CLICK, WHEEL_UP, WHEEL_DOWN
 };
 
-class input_handler
-{
+enum key {
+    W, S, A, D, Q, E, C, X, Z, SPACEBAR
+};
+
+class input_handler {
 public:
     static void on_mouse_click(int button, int state, int x, int y);
 

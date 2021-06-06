@@ -18,6 +18,8 @@ public:
     quaternion orientation;
     quaternion target_orientation;
     double t{};
+    double zoom_factor{ 1.0 };
+    bool is_switched{};
 };
 
 #endif // !GAME_CAMERA_H

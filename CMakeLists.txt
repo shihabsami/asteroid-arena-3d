@@ -34,9 +34,10 @@ set(SOURCE_FILES main/main.cpp main/config.h
         objects/wall.cpp objects/wall.h
         objects/spaceship.cpp objects/spaceship.h
         objects/asteroid.cpp objects/asteroid.h
+        objects/particle.cpp objects/particle.h
         utilities/game_manager.cpp utilities/game_manager.h
-        utilities/game_manager.cpp utilities/game_manager.h
-        utilities/collision_handler.cpp utilities/collision_handler.h)
+        utilities/collision_handler.cpp utilities/collision_handler.h
+        utilities/particle_system.cpp utilities/particle_system.h)
 
 add_executable(Asteroid_Arena_3D ${SOURCE_FILES})
 target_link_libraries(Asteroid_Arena_3D ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})

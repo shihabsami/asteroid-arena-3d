@@ -77,7 +77,7 @@ void init_game(int* argcp, char** argv, game_window* window) {
     global::height = static_cast<double>(window->height);
 
     glutCreateWindow(GAME_TITLE);
-    // if (window->is_fullscreen) glutFullScreen();
+    if (window->is_fullscreen) glutFullScreen();
 
     // register callback methods
     glutReshapeFunc(on_reshape);
@@ -106,12 +106,17 @@ void init_game(int* argcp, char** argv, game_window* window) {
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
     glShadeModel(GL_SMOOTH);
 
+    GLfloat global_light[]{ 0.2, 0.2, 0.2, 1.0 };
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_light);
+
     asset_library::load_textures();
     asset_library::load_models();
 
     manager = make_shared<game_manager>();
     manager->o_register = make_shared<object_register>();
     manager->c_handler = make_shared<collision_handler>(manager);
+    manager->p_system = make_shared<particle_system>();
+    manager->o_register->p_system = manager->p_system;
 
     manager->start_game();
 
