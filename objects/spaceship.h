@@ -5,16 +5,31 @@
 
 class spaceship : public game_object {
 public:
-    using game_object::game_object;
+    spaceship(
+        const shared_ptr<mesh_t>& body,  const shared_ptr<mesh_t>& l_wing, const shared_ptr<mesh_t>& r_wing, GLuint texture_id,
+        const vector3d& position, const quaternion& rotation, const vector3d& scale,
+        const vector3d& direction, double velocity);
+
+    ~spaceship() override;
 
     void init() override;
 
     void movement() override;
 
+    void pitch(double amount);
+
+    void roll(double amount);
+
+    void yaw(double amount);
+
     void draw() override;
 
-    double t;
-    bool is_moving;
+    GLenum point_light;
+    shared_ptr<mesh_t> l_wing;
+    shared_ptr<mesh_t> r_wing;
+    quaternion l_wing_rotation;
+    quaternion r_wing_rotation;
+    double t{};
 };
 
 #endif // !SPACESHIP_H

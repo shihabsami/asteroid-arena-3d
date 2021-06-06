@@ -13,8 +13,11 @@ public:
 
     vector3d& operator=(const vector3d& v);
 
-    // normalize the vector i.e. having magnitude of 1.0
+    // normalise the vector i.e. having magnitude of 1.0
     void normalise();
+
+    // get this vector normalised
+    [[nodiscard]] vector3d get_normalised() const;
 
     [[nodiscard]] double get_magnitude() const;
 
@@ -30,9 +33,15 @@ public:
     // cross product operation between two vectors
     [[nodiscard]] vector3d cross(const vector3d& v) const;
 
+    [[nodiscard]] vector3d get_rotated(double angle, const vector3d& axis) const;
+
+    [[nodiscard]] vector3d get_rotated(const quaternion& q) const;
+
     void rotate(double angle, const vector3d& axis);
 
     void rotate(const quaternion& q);
+
+    static vector3d lerp(const vector3d& start, const vector3d& end, double t);
 
     // operator overloads to do scalar operations
     vector3d operator+(const vector3d& v) const;
@@ -50,6 +59,12 @@ public:
     vector3d& operator*=(double s);
 
     vector3d& operator/=(double s);
+
+    static vector3d forward();
+
+    static vector3d right();
+
+    static vector3d up();
 
     double x;
     double y;

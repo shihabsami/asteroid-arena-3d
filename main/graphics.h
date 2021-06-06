@@ -26,5 +26,4 @@ static void error_check(const char* location) {
         printf("%s: %s\n", location, gluErrorString(error));
 }
 
-
 #endif // !GRAPHICS_H
