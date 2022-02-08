@@ -1,8 +1,7 @@
 # ASTEROID ARENA 3D
 
-## Notes
-- This is a work in progress.
-- Only a few classes have been brought back from the 2D game.
-- Only draws axes now.
-- Mostly for configuring and understanding perspective and game_camera functionality.
-- https://www.solarsystemscope.com/textures/
+### Controls
+- **W** - Move forward.
+- **A** - Steer left.
+- **D** - Steer right.
+- **Left Mouse Button** - Fire bullets.
